@@ -1,10 +1,8 @@
 (function($) {
-    jQuery(document).ready(function(){
+    jQuery(document).ready(function(){ 
 
         var gblFileName = "", timezone = "";
-        // var fbUserId = "", fbAuthResponse = false, fbAccessToken = "";
-        window.fbUserId = "", window.fbAuthResponse = false, window.fbAccessToken = "";
-
+        var fbUserId = "", fbAuthResponse = false, fbAccessToken = "";
         var fbScope = 'email,user_about_me,publish_actions,user_posts,user_status,manage_pages,publish_pages,user_photos,user_managed_groups';
         var albumId = 0, imgUploadedUrl = "", imgUploadedLink = "", imgUploadedId = 0, whereToPost = "";
         var albums = "", pages = "", groups = "", albums_array = [], pages_array = [], groups_array = [];
@@ -24,12 +22,28 @@
         // note: error_fields structure is 'field' => html element(#el or .el tag), 'error' => the error message
         var error_fields = [];
 
+        function fbInit(appId){
+            if( typeof(appId) != 'undefined' ){
+                window.fbAppId = appId;
+            }
+
+            FB.init({ 
+                appId: window.fbAppId,
+                status: true, 
+                cookie: true, 
+                xfbml: true, 
+                oauth: true, 
+                channelUrl: channelUrl,
+                version: 'v2.3'
+            });
+
+            window.fbApiInit = true; //init flag
+        }
+
     /* FB init */
         try{
-            if( fbAppId !== "" ){
-                FB.init({ appId: fbAppId, status: true, cookie: true, xfbml: true, oauth: true, channelUrl: channelUrl });
-
-                fbApiInit = true;
+            if( window.fbAppId !== "" ){
+                fbInit();
                 checkUserFbStatus();
             }
         }catch(Exception){
@@ -100,21 +114,21 @@
         }
 
         function allowNumericOnly(element){
-            element.keydown(function (e) {
-                // Allow: backspace, delete, tab, escape, enter and .
-                if ($.inArray(e.keyCode, [46, 8, 9, 27, 13, 110, 190]) !== -1 ||
-                     // Allow: Ctrl+A, Command+A
-                    (e.keyCode == 65 && ( e.ctrlKey === true || e.metaKey === true ) ) || 
-                     // Allow: home, end, left, right, down, up
-                    (e.keyCode >= 35 && e.keyCode <= 40)) {
-                         // let it happen, don't do anything
-                         return;
-                }
-                // Ensure that it is a number and stop the keypress
-                if ((e.shiftKey || (e.keyCode < 48 || e.keyCode > 57)) && (e.keyCode < 96 || e.keyCode > 105)) {
-                    e.preventDefault();
-                }
-            });
+            element.keydown(function(e) {
+            // Allow: backspace, delete, tab, escape, enter and .
+            if ($.inArray(e.keyCode, [46, 8, 9, 27, 13, 110, 190]) !== -1 ||
+              // Allow: Ctrl+A,Ctrl+C,Ctrl+V, Command+A
+              ((e.keyCode == 65 || e.keyCode == 86 || e.keyCode == 67) && (e.ctrlKey === true || e.metaKey === true)) ||
+              // Allow: home, end, left, right, down, up
+              (e.keyCode >= 35 && e.keyCode <= 40)) {
+              // let it happen, don't do anything
+              return;
+            }
+            // Ensure that it is a number and stop the keypress
+            if ((e.shiftKey || (e.keyCode < 48 || e.keyCode > 57)) && (e.keyCode < 96 || e.keyCode > 105)) {
+              e.preventDefault();
+            }
+          });
         }
 
         function activateModal(target) {
@@ -184,7 +198,7 @@
             console.log("get_pages is called");
 
             $.ajax({
-                url: "https://graph.facebook.com/"+fbUserId+"/accounts?fields=id,name&access_token="+fbAccessToken,
+                url: window.fbHost+fbUserId+"/accounts?fields=id,name&limit="+window.fbLimit+"&access_token="+fbAccessToken,
                 type: 'get',
                 assync: false
             }).done(function (response1){
@@ -207,7 +221,7 @@
             console.log("get_groups is called");
 
             $.ajax({
-                url: "https://graph.facebook.com/"+fbUserId+"/groups?fields=id,name,administrator&access_token="+fbAccessToken,
+                url: window.fbHost+fbUserId+"/groups?fields=id,name,administrator&limit="+window.fbLimit+"&access_token="+fbAccessToken,
                 type: 'get',
                 assync: false
             }).done(function (response2){
@@ -248,7 +262,7 @@
             // );
 
             $.ajax({
-                url: 'https://graph.facebook.com/'+fbUserId+'/albums?fields=id,can_upload,name&access_token='+fbAccessToken,
+                url: window.fbHost+fbUserId+'/albums?fields=id,can_upload,name&limit='+window.fbLimit+'&access_token='+fbAccessToken,
                 type: 'get',
                 assync: false,
             }).done(function (response){
@@ -384,7 +398,7 @@
 
                         $.ajax({
                             assync: false,
-                            url: "https://graph.facebook.com/"+albumId+"/photos",
+                            url: window.fbHost+albumId+"/photos",
                             type: "POST",
                             data: fd,
                             processData: false,
@@ -431,7 +445,7 @@
                                                         if( check_if_page < 0 ){
 
                                                             var request = $.ajax({
-                                                                            url: 'https://graph.facebook.com/'+row+'/feed',
+                                                                            url: window.fbHost+row+'/feed',
                                                                             type: 'post',
                                                                             assync: false,
                                                                             data: {
@@ -469,7 +483,7 @@
                                                         if( $.trim( $("#target_url").val() ) !== "" ){
                                                             if( window.user_image_is_deleted === false ){
                                                                 $.ajax({
-                                                                    url: "https://graph.facebook.com/"+imgUploadedId+"?method=DELETE&access_token="+fbAccessToken,
+                                                                    url: window.fbHost+imgUploadedId+"?method=DELETE&access_token="+fbAccessToken,
                                                                     type: 'post',
                                                                     processData: false,
                                                                     contentType: false,
@@ -500,7 +514,7 @@
                                                 }
                                             }else{
                                                 $.ajax({
-                                                    url: 'https://graph.facebook.com/v2.5/'+imgUploadedId+'?fields=link&access_token='+fbAccessToken,
+                                                    url: window.fbHost+'v2.5/'+imgUploadedId+'?fields=link&access_token='+fbAccessToken,
                                                     type: 'get',
                                                     assync: false,
                                                     dataType: 'json',
@@ -605,7 +619,7 @@
                                         
                                         fd.append("source", blob);
                                         fd.append("message", $("#post_title").val());
-                                        url = "https://graph.facebook.com/"+row+"/photos?access_token="+page_access_token;
+                                        url = window.fbHost+row+"/photos?access_token="+page_access_token;
                                             
                                         $.ajax({
                                             url: url,
@@ -644,7 +658,7 @@
                                                             fd2.append("caption", $("#post_description").val());
                                                             fd2.append("message", $("#post_message").val());
                                                             fd2.append('picture', pageImgUploadedUrl);
-                                                            url2 = "https://graph.facebook.com/"+row+"/feed";
+                                                            url2 = window.fbHost+row+"/feed";
 
                                                             var page_success_flag = false;
                                                             $.ajax({
@@ -665,7 +679,7 @@
                                                                     page_success_flag = true;
                                                                     // if success, let's delete the photo post to hide it on the timeline
                                                                     $.ajax({
-                                                                        url: "https://graph.facebook.com/"+pageImgUploadedId+"?method=DELETE&access_token="+page_access_token,
+                                                                        url: window.fbHost+pageImgUploadedId+"?method=DELETE&access_token="+page_access_token,
                                                                         type: "post",
                                                                         processData: false,
                                                                         contentType: false,
@@ -696,7 +710,7 @@
                                                                     // if( page_success_flag === true ){
                                                                         // if success, let's delete the photo post to hide it on the timeline
                                                                         $.ajax({
-                                                                            url: "https://graph.facebook.com/"+pageImgUploadedId+"?method=DELETE&access_token="+page_access_token,
+                                                                            url: window.fbHost+pageImgUploadedId+"?method=DELETE&access_token="+page_access_token,
                                                                             type: "post",
                                                                             processData: false,
                                                                             contentType: false,
@@ -750,10 +764,9 @@
         }
 
         function getLongLiveFBToken(){
-            console.log("Getting LongLive FB Token...");
             $.ajax({
                 // url : wpSocialMageAjaxUrl,
-                url: wpSocialMageAjaxUrl,
+                url: ajaxurl,
                 type : 'post',
                 data : { 
                     'q' : 'get_long_live_token', 
@@ -869,8 +882,7 @@
             $.ajax({
                 assync: false,
                 type: "POST",
-                
-                url: wpSocialMageAjaxUrl,
+                url: ajaxurl,
                 dataType : 'json',
                 data: { 
                     action: 'WpSocialMageAjax',
@@ -951,7 +963,7 @@
 
         $("#btn_browse").unbind('click').click(function (){
             bar.width('0%'); 
-            $('#btn_add_filter, #update_image').addClass("invisible");
+            $('#btn_add_filter, #update_image').addClass("mui-invisible");
             $("#select_image").trigger('click');  
         });
 
@@ -967,7 +979,7 @@
             type: 'post',
             beforeSend: function() {
                 progress.fadeIn(function(){
-                    progress.removeClass('invisible');
+                    progress.removeClass('mui-invisible');
                 });
                 status.empty();
                 var percentVal = '0%';
@@ -992,7 +1004,7 @@
                     try{
                         if( data.status == "success" ){
                         
-                            window.location = url+"?&q=imagefilters&action=add_filters&image="+data.filename;
+                            window.location = url+"&q=imagefilters&action=add_filters&image="+data.filename;
                         }
                     }catch(Exception){
                         console.log(Exception);
@@ -1001,7 +1013,7 @@
             }
         });
 
-        $(document).on("click", ".modal", function (){
+        $(document).on("click", ".mui-modal", function (){
             activateModal( $(this).data("target") );
         }); 
 
@@ -1207,7 +1219,7 @@
             }else{
                 $.each(error_fields, function (i, row){
                     console.log(row);
-                    $(row.field).addClass("dirty");
+                    $(row.field).addClass("mui-dirty");
                     $.snackbar({ content: row.error, timeout: 6000});
                 });
             }
@@ -1229,8 +1241,7 @@
             }else{
                 if( validate_inputs(true) ){
                     $.ajax({
-                        
-                        url: wpSocialMageAjaxUrl,
+                        url: ajaxurl,
                         type: 'post',
                         dataType: 'json',
                         data: { 
@@ -1273,8 +1284,8 @@
                             $("#_fbtoken").val(fbAccessToken);
                             $.ajax({
                                 // url : wpSocialMageAjaxUrl,
-                                url: wpSocialMageAjaxUrl,
-                                data : "action=wpSocialMageAjax&"+$("#wp_social_mage_form").serialize()+"&fbUserId="+fbUserId+"&whereToPost="+whereToPost+"&whereToPostPage="+whereToPostPage,
+                                url: ajaxurl,
+                                data : "action=WpSocialMageAjax&"+$("#wp_social_mage_form").serialize()+"&fbUserId="+fbUserId+"&whereToPost="+whereToPost+"&whereToPostPage="+whereToPostPage,
                                 type : 'post',
                                 dataType : 'json'
                             }).done(function (data){
@@ -1292,7 +1303,7 @@
                 }else{
                     console.log(error_fields);
                     $.each(error_fields, function (i, row){
-                        $(row.field).addClass("dirty");
+                        $(row.field).addClass("mui-dirty");
                         $.snackbar({ content: row.error, timeout: 6000});
                     });
                 }
@@ -1318,10 +1329,6 @@
                     res = false;
                     error_fields.push({"field": "#target_url", "error": "Please enter a valid URL."});
                 }
-
-                $("#post_message").parent("div").fadeOut(function (){
-                    $("#post_title").parent("div").removeClass('hidden').fadeIn();
-                });
 
                 if( $("#post_title").val() === ""  ){
                     res = false;
@@ -1485,8 +1492,7 @@
                 $("#image_preview").addLayer({
                     layer: true,
                     name: 'background',
-                    // draggable: getUrlParameter('action') == "image-filters" ? false : true, 
-                    draggable: true,
+                        
                     type: 'image',
                     source: $("#image_preview").data("src"),
                     x: ( $w / 2 ) - ( $w / 2 ), 
@@ -1497,8 +1503,7 @@
                 $("#image_preview").addLayer({
                     layer: true,
                     name: 'background',
-                    // draggable: getUrlParameter('action') == "image-filters" ? false : true,   
-                    draggable: true,
+                        
                     type: 'image',
                     source: $("#image_preview").data("src"),
                     x: ( $w / 2 ) - ( $w / 2 ), 
@@ -1753,33 +1758,27 @@
               } else if (response.status === 'not_authorized') {
                 // the user is logged in to Facebook, 
                 // but has not authenticated your app
-                // $("#connect_to_facebook").parent("div").removeClass("invisible");
+                // $("#connect_to_facebook").parent("div").removeClass("mui-invisible");
                 $("#connect_to_facebook").parent("div").slideDown();
               } else {
                 // the user isn't logged in to Facebook.
                 $("#connect_to_facebook").parent("div").slideDown();
-                // $("#connect_to_facebook").parent("div").removeClass("invisible");
+                // $("#connect_to_facebook").parent("div").removeClass("mui-invisible");
               }
-            }, true);
+            });
         }
 
         $("#target_url").bind("change keyup", function (){
             if( $(this).val() !== "" ){
-                $("#post_title").prev("label").html("Title");
-                $("#post_title").parent("div").fadeOut();
+                $("#post_title").next("label").html("Title");
                 $("#post_message").parent("div").removeClass("hidden").fadeIn();
                 $("#post_description").parent("div").removeClass("hidden").fadeIn();
             }else{
                 $("#post_message").parent("div").fadeOut();
-                $("#post_title").parent("div").removeClass('hidden').fadeIn();
-                $("#post_title").prev("label").html("What's on your mind?");
+                $("#post_title").next("label").html("What's on your mind?");
                 $("#post_description").parent("div").fadeOut();
             }
         });
-
-        $("#post_title").keyup(function (){
-            $("#post_message").html( $(this).val() );
-        });        
 
         if( currentTimezone !== "" ){
             $("#timezone_setting").children("option").removeAttr("selected");
@@ -1794,33 +1793,30 @@
                 FB.login(function(response) {
                     if (response.authResponse) {
                         // Do all facebook stuffs here
-                        $this.parent("div").addClass("invisible");
+                        $this.parent("div").addClass("mui-invisible");
                         fbUserId = response.authResponse.userID;
                         fbAccessToken = response.authResponse.accessToken;     
-                        refreshWhereToPost(fbUserId);     
-                        getLongLiveFBToken();    
+                        refreshWhereToPost(fbUserId);         
                     } else {
                         console.log('User cancelled login or did not fully authorize.');
-                        $this.parent("div").removeClass("invisible");   
+                        $this.parent("div").removeClass("mui-invisible");   
                     }
                 }, {scope: fbScope});
                 return false;
             });
 
-            $('.number-light').keyup(function(){
-                $(this).val( $(this).val().replace(/[^0-9]/g,'') );
-            });
+            allowNumericOnly( $('.number-light') );
 
             var j = setInterval(function (){
 
                 $("input[name='optionsAlbum']").click(function(){
                     if( $(this).val() == "choose" ){
-                        $("#div_create_new_album").addClass("invisible").fadeOut(function(){
-                            $("#div_choose_existing_album").removeClass("invisible").fadeIn();
+                        $("#div_create_new_album").addClass("mui-invisible").fadeOut(function(){
+                            $("#div_choose_existing_album").removeClass("mui-invisible").fadeIn();
                         }); 
                     }else{
-                        $("#div_choose_existing_album").addClass("invisible").fadeOut(function(){
-                            $("#div_create_new_album").removeClass("invisible").fadeIn();
+                        $("#div_choose_existing_album").addClass("mui-invisible").fadeOut(function(){
+                            $("#div_create_new_album").removeClass("mui-invisible").fadeIn();
                         }); 
                     } 
                 });
@@ -1894,12 +1890,12 @@
             $(".library-images").fadeOut();
             $("#btn_select_library").removeAttr("disabled");
             $("#inner_results").fadeIn(function (){
-                $(this).html('<div class="text-center text-subhead"><img src="'+imagesUrl+'ajax-loader.gif"> Please wait...</div>');
+                $(this).html('<div class="mui-text-center mui-text-subhead"><img src="'+imagesUrl+'ajax-loader.gif"> Please wait...</div>');
             });
 
             $.ajax({
                 // url : wpSocialMageAjaxUrl,
-                url: wpSocialMageAjaxUrl,
+                url: ajaxurl,
                 type : 'post',
                 dataType : 'json',
                 data : { q : 'image_search', 'query' : $("#img_search").val(), action: 'WpSocialMageAjax' },
@@ -1960,8 +1956,7 @@
                 $.contextMenu.separator, {
                     'Delete': function(menuItem, menu) { 
                         $.ajax({
-                            
-                            url: wpSocialMageAjaxUrl,
+                            url: ajaxurl,
                             type: "post",
                             dataType: "json",
                             data: { q: 'delete_image', filename: $this.data("filename"), action: 'WpSocialMageAjax' }
@@ -1989,8 +1984,7 @@
             $this.html("Please wait...").css("display", "block").removeClass("image-from-url").attr("href", "javascript:void(0)");
 
             $.ajax({
-                
-                url: wpSocialMageAjaxUrl,
+                url: ajaxurl,
                 type: "post",
                 dataType: "json",
                 data: { q: 'grab_image_from_url', src: src, action: 'WpSocialMageAjax' }
@@ -2086,25 +2080,22 @@
 
 
         $("#form_settings").submit(function(e){
-        // $("#save_settings").click(function (e){
+        // $("#wp_sm_save_settings").click(function (e){
             if( formFbSettingHasError($(this)) ){
                 e.preventDefault();
                 return false;
             }else{
                 try{
-                    $("#save_settings").html("Please wait...");
+                    $("#wp_sm_save_settings").html("Please wait...");
                     var form = $("#form_settings");
-                    // fbAppId = form.find('input[name="fb_app_id"]').val().replace(/[^0-9]/g,''); // ensure that it's only numbers
-                    var newfbAppId = form.find('input[name="fb_app_id"]').val().replace(/[^0-9]/g,''); // ensure that it's only numbers
+                    // window.fbAppId = form.find('input[name="fb_app_id"]').val().replace(/[^0-9]/g,''); // ensure that it's only numbers
+                    var newfbAppID = form.find('input[name="fb_app_id"]').val().replace(/[^0-9]/g,''); // ensure that it's only numbers
                     
-                    FB.init({ appId: newfbAppId, status: true, cookie: true, xfbml: true, oauth: true, channelUrl: channelUrl});
+                    fbInit(newfbAppID);
 
-                    window.fbApiInit = true; //init flag
-                    
+                    window.fbAppId = newfbAppID;
 
-                    fbAppId = newfbAppId;
-
-                     fbEnsureInit(function() {
+                    fbEnsureInit(function() {
                         try{
                             // this will be executed if FB is initialized
                             FB.login(function(response) {
@@ -2118,8 +2109,7 @@
 
                                     $.ajax({
                                         assync: false,
-                                        
-                                        url: wpSocialMageAjaxUrl,
+                                        url: ajaxurl,
                                         type: 'post',
                                         dataType: 'json',
                                         beforeSend: function (){
@@ -2128,23 +2118,23 @@
                                         data: {
                                             action: 'WpSocialMageAjax',
                                             q: 'generate_longlive_token',
-                                            fb_app_id: fbAppId, 
+                                            fb_app_id: window.fbAppId, 
                                             fb_app_secret: form.find('input[name="fb_app_secret"]').val(),
                                             fb_user_id: fbUserId,
                                             fb_shortlive_auth_token: fbAccessToken,
                                         }
                                     }).done(function (response){
+                                        console.log(response);
                                         if( response.status == '200' ){
                                             $.snackbar({ content: "Your facebook has been successfully connected.", timeout: 6000});
                                             $.ajax({
-                                                
-                                                url: wpSocialMageAjaxUrl,
+                                                url: ajaxurl,
                                                 type: 'post',
                                                 dataType: 'json',
                                                 data: {
                                                     action: 'WpSocialMageAjax',
                                                     q: 'update_settings', 
-                                                    fb_app_id: fbAppId, 
+                                                    fb_app_id: window.fbAppId, 
                                                     fb_app_secret: form.find('input[name="fb_app_secret"]').val(),
                                                     fb_user_id: fbUserId,
                                                     fb_auth_token: response.longLiveAccessToken,
@@ -2153,35 +2143,35 @@
                                             }).done(function(data){
                                                 if( data.status_code == "200" ){
                                                     $("#timezone_setting").html($('#timezone_setting').val());
-                                                    $.snackbar({ content: "Your Settings have been saved.", timeout: 4000});
-                                                    $("#save_settings").html("<i class='fa fa-facebook-official'></i> Save & Connect to Facebook");
+                                                    $.snackbar({ content: "Your Settings has been saved.", timeout: 4000});
+                                                    $("#wp_sm_save_settings").html("Save & Connect to Facebook");
                                                     $(".rd-icon-home span a").click();
                                                 }
                                             }).fail(function(data){
                                                 console.log(data);
-                                                $("#save_settings").html("<i class='fa fa-facebook-official'></i> Save & Connect to Facebook");
+                                                $("#wp_sm_save_settings").html("Save & Connect to Facebook");
                                             });
                                         }else{
                                             if( response.msg ){
                                                 $.snackbar({ content: response.msg, timeout: 4000 });
-                                                $("#save_settings").html("<i class='fa fa-facebook-official'></i> Save & Connect to Facebook");
+                                                $("#wp_sm_save_settings").html("Save & Connect to Facebook");
                                             }
                                             
                                         }
                                     }).fail(function(data){
                                         console.log(data);
                                         console.log('Error generating long live auth token');
-                                        $("#save_settings").html("<i class='fa fa-facebook-official'></i> Save & Connect to Facebook");
+                                        $("#wp_sm_save_settings").html("Save & Connect to Facebook");
                                     });
 
                                 } else {
                                     console.log('User cancelled login or did not fully authorize.'); 
-                                    $("#save_settings").html("<i class='fa fa-facebook-official'></i> Save & Connect to Facebook");
+                                    $("#wp_sm_save_settings").html("Save & Connect to Facebook");
                                 }
                             }, {scope: fbScope});
                         }catch(Exception){
                             console.log(Exception);
-                            $("#save_settings").html("<i class='fa fa-facebook-official'></i> Save & Connect to Facebook");
+                            $("#wp_sm_save_settings").html("Save & Connect to Facebook");
                         }
                     });
                                         
@@ -2189,7 +2179,7 @@
                     
                 }catch(ErrorException){
                     console.log(ErrorException);
-                    $("#save_settings").html("<i class='fa fa-facebook-official'></i> Save & Connect to Facebook");
+                    $("#wp_sm_save_settings").html("Save & Connect to Facebook");
                 }
             }
         });
@@ -2198,8 +2188,7 @@
 
         $("#rebrand").click(function (){
             $.ajax({
-                
-                url: wpSocialMageAjaxUrl,
+                url: ajaxurl,
                 type: 'post',
                 dataType: 'json',
                 data: { q: 'get_user_type', type: 'standard_wl,pro_wl', action: 'WpSocialMageAjax' },
@@ -2226,77 +2215,10 @@
             window.hasImageEffects = true;
         });
 
-        $("#btn_update_image").click(function (){
-            var btn = $(this);
-            var $this = $("#update_image"), action = "update", filename = $("#image_preview").data("filename");
-            btn.children('i').addClass('fa-spin');
-            html2canvas($(".image-holder"), {
-                onrendered: function(canvas) {
-                    dataURL = canvas.toDataURL();
-                    $.ajax({
-                        assync: false,
-                        type: "POST",
-                        url: wpSocialMageAjaxUrl,
-                        dataType : 'json',
-                        data: { 
-                            action: 'WpSocialMageAjax',
-                            imgBase64: dataURL,
-                            data_action : action,
-                            q : "save_canvas",
-                            filename : filename
-                        },
-                        beforeSend: function (){
-                            btn.attr("disabled", "disabled").addClass("disabled");
-                        }
-                    }).done(function(o) {
-
-                        (function (el) {
-                            setTimeout(function () {
-                                btn.removeAttr("disabled").removeClass("disabled");
-                                btn.text("Please wait...");
-                                if( o.status == "success" && action == "update" ){
-                                    // window.location = '?page=wp-social-mage-dashboard&image='+filename;
-                                    var a = document.createElement('a');
-                                    a.href = '?page=wp-social-mage-dashboard&action=add_filters&image='+filename;
-                                    
-                                    // click event for firefox
-                                    var clickEvent = new MouseEvent("click", {
-                                        "view": window,
-                                        "bubbles": true,
-                                        "cancelable": false
-                                    });
-
-                                    a.dispatchEvent(clickEvent);
-
-                                }else{
-                                    if( o.msg ){
-                                        $.snackbar({content: "Sorry, please make sure this folder has a 755 permission and/or uncomment the openbase_dir in your server's PHP Configuration.", timeout: 4000});
-                                    }
-                                    $this.html("Save");
-                                }
-                            }, 4000);
-                        }( $this.html('&#10003; Redirecting...please wait.' )) );
-
-                      // If you want the file to be visible in the browser 
-                      // - please modify the callback in javascript. All you
-                      // need is to return the url to the file, you just saved 
-                      // and than put the image in your browser.
-                    }).fail(function(){
-                        $this.html("Save");
-                        (function (el) {
-                            setTimeout(function () {
-                                $this.removeAttr("disabled").removeClass("disabled");
-                                el.next('span.saving-status').fadeOut(function(){
-                                    $(this).remove();
-                                });
-                            }, 4000);
-                        }( $this.after('<span class="saving-status" style="margin-left: 5px; color: red;">Error! Please try again later.</span>')) );
-                    });
-                }
-            });
-        });
-
         /* END JQUERY EVENTS */
+
+    
     });
+
 
 }(jQuery));

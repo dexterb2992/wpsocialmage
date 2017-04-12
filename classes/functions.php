@@ -232,8 +232,11 @@ if( !function_exists('update_user_access_token') ){
 if( !function_exists('getLongLiveFBToken') ){
 	function getLongLiveFBToken($_INPUT){
 		$shortLiveToken = $_INPUT['short_life_token'];
-		$url = "https://graph.facebook.com/oauth/access_token?client_id=".WP_SM_FB_APP_ID."&client_secret=".WP_SM_FB_APP_SECRET
-				."&grant_type=fb_exchange_token&fb_exchange_token=".$shortLiveToken;
+
+		$app_id = isset($_INPUT['fb_app_id']) ? $_INPUT['fb_app_id'] : WP_SM_FB_APP_ID;
+		$app_secret = isset($_INPUT['fb_app_secret']) ? $_INPUT['fb_app_secret'] : WP_SM_FB_APP_SECRET;
+
+		$url = "https://graph.facebook.com/oauth/access_token?client_id=$app_id&client_secret=$app_secret&grant_type=fb_exchange_token&fb_exchange_token=".$shortLiveToken;
 		$data = getPageData($url);
 
 		$res = explode('&', $data);
@@ -254,17 +257,24 @@ if( !function_exists('getLongLiveFBToken') ){
 if( !function_exists('generateLongLiveFBToken') ){
 	function generateLongLiveFBToken($_INPUT){
 		$shortLiveToken = $_INPUT['fb_shortlive_auth_token'];
-		$url = "https://graph.facebook.com/oauth/access_token?client_id=".$_INPUT['fb_app_id']
-				."&client_secret=".$_INPUT['fb_app_secret']
-				."&grant_type=fb_exchange_token&fb_exchange_token=".$shortLiveToken;
-		$data = getPageData($url);
 
-		$res = explode('&', $data);
-		$arr = explode('=', $res[0]);
-		$arr2 = explode('=', $res[1]);
+		$app_id = isset($_INPUT['fb_app_id']) ? $_INPUT['fb_app_id'] : WP_SM_FB_APP_ID;
+		$app_secret = isset($_INPUT['fb_app_secret']) ? $_INPUT['fb_app_secret'] : WP_SM_FB_APP_SECRET;
 
-		if( $arr[1] !== null && $arr[1] != "" ){
-			return json_encode( array( 'status' => '200', "longLiveAccessToken" => $arr[1], "expiresIn" => (int)$arr2[1], "shortLiveAccessToken" => $shortLiveToken ) );
+		$url = "https://graph.facebook.com/oauth/access_token?client_id=$app_id&client_secret=$app_secret&grant_type=fb_exchange_token&fb_exchange_token=".$shortLiveToken;
+		$data = json_decode(getPageData($url));
+
+
+		if( $data->access_token !== null && $data->access_token != "" ){
+			updateSettings(array("fb_auth_token" => $data->access_token));
+			return json_encode( 
+				array( 
+					'status' => '200', 
+					"longLiveAccessToken" => $data->access_token, 
+					"expiresIn" => null, 
+					"shortLiveAccessToken" => $shortLiveToken
+				)
+			);
 
 		}
 

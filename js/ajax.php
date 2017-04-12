@@ -6,58 +6,51 @@ include( dirname( plugin_dir_path( __FILE__ ) ).'/classes/config.php' );
 include WP_SM_CLASSES_FOLDER."functions.php"; // this is where we can find all the functions being used below 
 
 $q = $_POST['q'];
+$response = "{}";
 
 if( $q == "save_canvas" ){
 
-	echo saveCanvas($_POST['imgBase64'], $_POST);
-	die();
+	$response = saveCanvas($_POST['imgBase64'], $_POST);
 
 }else if( $q == "save_schedule" ){
 
-	echo saveSchedule($_POST);
-	die();
+	$response = saveSchedule($_POST);
 
 }else if( $q == "get_long_live_token" ){
-	echo getLongLiveFBToken($_POST);
-	die();
+	$response = getLongLiveFBToken($_POST);
 
 }elseif( $q == "generate_longlive_token" ){
-	echo generateLongLiveFBToken($_POST);
-	die();
+	$response = generateLongLiveFBToken($_POST);
 
 }elseif( $q == "image_search" ){
-	echo searchImages($_POST['query']);
-	die();
+	$response = searchImages($_POST['query']);
 
 }elseif ( $q == "delete_image" ) {
 
-	echo deleteImage($_POST['filename']);
-	die();
+	$response = deleteImage($_POST['filename']);
 
 }elseif ( $q == "grab_image_from_url" ) {
 
-	echo grabImageFromUrl($_POST['src']);
-	die();
+	$response = grabImageFromUrl($_POST['src']);
 
 }elseif ( $q == "get_user_type" ){
-	echo getUserAccess($_POST['type']);
-	die();
+	$response = getUserAccess($_POST['type']);
 
 }else if( $q == "set_timezone" ){
 
-	echo setTimezone($_POST['timezone']);
-	die();
+	$response = setTimezone($_POST['timezone']);
 
 }else if( $q == "get_settings" ){
 
-	echo get_social_mage_current_settings();
-	die();
+	$response = get_social_mage_current_settings();
 
 }else if( $q == "update_settings" ){
 
-	echo updateSettings($_POST);
-	die();
+	$response = updateSettings($_POST);
 
 }
+
+echo trim($response);
+die;
 
 ?>

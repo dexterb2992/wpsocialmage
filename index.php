@@ -61,7 +61,7 @@ function wp_social_mage_admin_menu() {
     wp_register_script( 'colorpicker.js', plugins_url( '/js/colorpicker.js', __FILE__ ) );
     wp_register_script( 'select2.min.js', plugins_url( '/js/select2.min.js', __FILE__ ) );
     wp_register_script( 'caman.js', plugins_url( '/js/caman.js', __FILE__ ) );
-    wp_register_script( 'fb-all.js', plugins_url( '/js/fb/all.js', __FILE__ ) );
+    wp_register_script('fb-all.js', '//connect.facebook.net/en_US/all.js');
     wp_register_script( 'jcanvas.js', plugins_url( '/js/jcanvas.js', __FILE__ ) );
     wp_register_script( 'canvas2image.js', plugins_url( '/js/canvas2image.js', __FILE__ ) );
     wp_register_script( 'jquery.contextmenu.js', plugins_url( '/js/jquery.contextmenu.js', __FILE__ ) );
@@ -81,6 +81,9 @@ function wp_social_mage_admin_menu() {
     wp_register_style( 'colorpicker.css', plugins_url( '/css/colorpicker.css', __FILE__ ) );
     wp_register_style( 'select2.min.css', plugins_url( '/css/select2.min.css', __FILE__ ) );
     wp_register_style( 'jquery.contextmenu.css', plugins_url( '/css/jquery.contextmenu.css', __FILE__ ) );
+    
+    wp_register_style( 'font-awesome', '//maxcdn.bootstrapcdn.com/font-awesome/4.4.0/css/font-awesome.min.css' );
+    wp_register_style( 'bootstrap.min.css', plugins_url( 'css/bootstrap.min.css', __FILE__ ) );
     wp_register_style( 'wp-social-mage-style', plugins_url( '/css/style.css', __FILE__ ) );
 
 
@@ -127,7 +130,8 @@ function wp_social_mage_plugin_styles() {
     wp_enqueue_style( 'colorpicker.css' );
     wp_enqueue_style( 'select2.min.css' );
     wp_enqueue_style( 'jquery.contextmenu.css' );
-    wp_enqueue_style( 'style.css' );
+    wp_enqueue_style( 'font-awesome' );
+    wp_enqueue_style( 'bootstrap.min.css' );
     wp_enqueue_style( 'wp-social-mage-style' );
 }
 

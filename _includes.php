@@ -10,7 +10,9 @@
 	var uploadsUrl = "<?php echo plugins_url( '/uploads/', __FILE__ ); ?>";
 	var channelUrl = "<?php echo plugins_url( '/js/fb/channel.php', __FILE__ ); ?>";
 	var $image_width = 500, $image_height = 500, $w = 500, $h = 500;
-	var fbAppId = "<?php echo WP_SM_FB_APP_ID; ?>";
+	window.fbAppId = "<?php echo WP_SM_FB_APP_ID; ?>";
+	window.fbLimit = 100;
+	window.fbHost = "https://graph.facebook.com/";
 	var currentTimezone = '<?php echo WP_SM_CURRENT_TIMEZONE; ?>';
 </script>
 

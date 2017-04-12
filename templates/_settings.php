@@ -1,5 +1,8 @@
-<div class="wp-social-mage-wrapper">
-	<div class="mui-container">
+<div class="box-header">
+	<p class="lead">Settings </p>
+</div>
+<div class="box-body">
+	<div class="box-content">
 		<style type="text/css">
 			#connect_to_facebook{ display: none !important; }
 		</style>
@@ -7,32 +10,32 @@
 			include "_header.php"; 
 		?>
 
-		<div class="mui-row">
-			<div class="mui-col-md-6">
-				<div class="mui-text-subhead mui-text-accent mui-pull-left mui-text-left mui-align-top">
+		<div class="row">
+			<div class="col-md-6">
+				<div class="text-subhead text-accent pull-left text-left align-top">
 					
 				</div>
 			</div>
 		</div>
 
-		<div class="mui-row">
-			<div class="mui-col-md-4">
-				<div class="mui-text-subhead mui-text-black mui-pull-left mui-text-left mui-align-top">
+		<div class="row">
+			<div class="col-md-4">
+				<div class="text-subhead text-black pull-left text-left align-top">
 					Your current timezone: 
 				</div>
-				<div class="mui-text-title mui-text-black mui-text-right mui-align-top" id="WP_SM_CURRENT_TIMEZONE"> 
+				<div class="text-title text-black text-right align-top" id="WP_SM_CURRENT_TIMEZONE"> 
 					<?php 
 						echo isset($CURRENT_SETTINGS[0]['timezone']) && $CURRENT_SETTINGS[0]['timezone'] != "" ? $CURRENT_SETTINGS[0]['timezone'] : '[Not set]';
 					?>
 				</div>
 			</div>
-			<div class="mui-col-md-5"></div>
+			<div class="col-md-5"></div>
 		</div>
-		<div class="mui-row" style="margin-top:20px;">
-			<div class="mui-col-md-4">
-				<div class="mui-form-group">
+		<div class="row" style="margin-top:20px;">
+			<div class="col-md-4">
+				<div class="form-group">
 					<label>Set your timezone</label>
-					<select class="mui-form-control select2" id="timezone_setting">
+					<select class="form-control select2" id="timezone_setting">
 						<?php 
 							$timezones = DateTimeZone::listIdentifiers(DateTimeZone::ALL);
 							foreach ( $timezones as $key => $value) {
@@ -42,28 +45,28 @@
 					</select>
 				</div>
 			</div>
-			<div class="mui-col-md-5"></div>		
+			<div class="col-md-5"></div>		
 		</div>
-		<div class="mui-row">
-			<div class="mui-col-md-4">
+		<div class="row">
+			<div class="col-md-4">
 				<iframe id="remember" name="remember" src="about:blank" style="display:none;"></iframe>
 				<form id="form_settings" method="post" action="" target="remember">
-					<div class="mui-form-group">
+					<div class="form-group">
 						<label>Facebook App ID</label>
-						<input type="text" name="fb_app_id" class="mui-form-group number-light" title="Enter your Facebook App ID" value="<?php echo WP_SM_FB_APP_ID;?>">
+						<input type="text" name="fb_app_id" class="form-control number-light" data-toggle="tooltip" data-original-title="Enter your Facebook App ID" value="<?php echo WP_SM_FB_APP_ID;?>">
 					</div>		
-					<div class="mui-form-group">
+					<div class="form-group">
 						<label>Facebook App Secret</label>
-						<input class="mui-form-group" type="text" name="fb_app_secret" value="<?php echo WP_SM_FB_APP_SECRET;?>"/>
+						<input class="form-control" type="text" name="fb_app_secret" data-toggle="tooltip" data-original-title="Enter your App Secret" value="<?php echo WP_SM_FB_APP_SECRET;?>"/>
 					</div>
-					<div class="mui-form-group">
-						<button class="mui-btn-primary mui-btn" id="wp_sm_save_settings">Save & Connect to Facebook</button>
+					<div class="form-group">
+						<button class="btn-primary btn btn-flat" id="save_settings"><i class="fa fa-facebook-official"></i> Save & Connect to Facebook</button>
 					</div>
 				</form>
 			</div>
-			<div class="mui-col-md-4"></div>
+			<div class="col-md-4"></div>
 		</div>
 		<?php include "_quotes.php"; ?>
-		<div class="mui-clearfix"></div>
+		<div class="clearfix"></div>
 	</div>
 </div>

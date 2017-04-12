@@ -1,12 +1,10 @@
-<div class="box-header">
-	<p class="lead">Image Filters </p>
-</div>
-<div class="box-body">
-	<div class="box-content">
-		<div class="row">	
-			<div class="col-md-5">	
-				<div class="row">
-					<div class="col-md-12">
+<div class="wp-social-mage-wrapper">
+	<div class="mui-container">
+		<?php include "_header.php"; ?>
+		<div class="mui-row">	
+			<div class="mui-col-md-5">	
+				<div class="mui-row">
+					<div class="mui-col-md-12">
 						<?php 
 							if( isset($_GET['image']) ){
 								
@@ -39,8 +37,8 @@
 									var $image_height = '<?php echo $image_height; ?>';
 									var $raw_image_width = '<?php echo $image_width; ?>';
 									var $raw_image_height = '<?php echo $image_height; ?>';
-									var $w = '<?php echo $w; ?>';
-									var $h = '<?php echo $h; ?>';
+									var $w = '<?php echo $image_width; ?>';
+									var $h = '<?php echo $image_height; ?>';
 								</script>
 								<div class="image-holder-outer">
 									<div class="image-holder" style="<?php echo 'width:500px; height: 500px;';?>"> 
@@ -59,63 +57,52 @@
 								<?php
 							}
 						?>
-						<div class="form-group text-center">
+						<div class="mui-form-group mui-text-center">
 							<!-- <label>Background Size</label> -->
-							<button type="button" id="image_preview_increase_bg" class="btn btn-primary btn-flat"><i class="fa fa-plus"></i> Increase</button>
-							<button type="button" id="image_preview_decrease_bg" class="btn btn-warning btn-flat"><i class="fa fa-minus"></i> Decrease</button>
+							<button type="button" id="image_preview_increase_bg" class="mui-btn mui-btn-primary">Increase</button>
+							<button type="button" id="image_preview_decrease_bg" class="mui-btn mui-btn-accent">Decrease</button>
 						</div>
 					</div>
-					<div class="row">
-						<div class="col-md-1"></div>
-						<div class="col-md-3">
-							<label class="form-floating-label">Image Size</label>
-						</div>
-						<div class="col-md-5">
-							<div class="form-group">
-								<select class="form-control select" id="image_size" data-source="sidebar">
+					<div class="mui-row">
+						<div class="mui-col-md-4"></div>
+						<div class="mui-col-md-4">
+							<div class="mui-form-group">
+								<select class="mui-form-control mui-select" id="image_size" data-source="sidebar">
 									<option value="500x500" data-id="1" title="Meme Size (500 x 500)" selected>Meme</option>
 									<option value="487x255" data-id="2" title="Clickable Size (487 x 255)">Clickable</option>
 								</select>
+								<label class="mui-form-floating-label">Image Size</label>
 							</div>
 						</div>
-						<div class="col-md-3">
-								<button class="btn-info btn btn-flat" id="btn_update_image"><i class="fa fa-refresh"></i> Update Image</button>
-						</div>
-					</div>
-					<div class="row">
-						<div class="col-md-2"></div>
-						<div class="com-md-8">
-							<small><b>Note: You can't drag the background if the original image size is 487x255</b></small>
-						</div>
-						<div class="col-md-2"></div>
+						<div class="mui-col-md-4"></div>
 					</div>
 				</div>
 			</div>
-			<div class="col-md-3">
+			<div class="mui-col-md-2">
 				<div class="rd-icon-lg-container">
 					<div class="rd-icon-lg rd-icon-effects">
 						<span>
-							<a href="javascript:void(0);" id="filter_types" data-value="interactive" data-toggle="tooltip" data-original-title="Image effects">Effects</a>
+							<a href="javascript:void(0);" id="filter_types" data-value="interactive">Effects</a>
 						</span>
 					</div>
 					<div class="rd-icon-lg rd-icon-save">
 						<span>
-							<a href="javascript:void(0)" id="update_image" data-toggle="tooltip" data-original-title="Save and proceed" data-action="update">Save</a>
+							<a href="javascript:void(0)" id="update_image" title="Save and proceed" data-action="update">Save</a>
 						</span>
 					</div>
 					<div class="rd-icon-lg rd-icon-download">
 						<span>
-							<a href="javascript:void(0)" id="download_image" data-toggle="tooltip" data-original-title="Download">Download</a>
+							<a href="javascript:void(0)" id="download_image" title="Download">Download</a>
 						</span>
 					</div>
 					<div class="rd-icon-lg rd-icon-cancel">
 						<span>
-							<a href="?page=wp-social-mage-dashboard" data-toggle="tooltip" data-original-title="Cancel & go back to Home">Cancel</a>
+							<a href="?page=wp-social-mage-dashboard">Cancel</a>
 						</span>
 					</div>
 				</div>
 			</div>
-			<div class="col-md-4">
+			<div class="mui-col-md-5">
 				<?php
 				 include "_imagefilters_sidebar.php"; 
 				?>
@@ -126,6 +113,6 @@
 	</div>
 </div>
 
-<div class="clearfix"></div>
+<div class="mui-clearfix"></div>
 
 		

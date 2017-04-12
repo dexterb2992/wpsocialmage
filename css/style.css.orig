@@ -1,18 +1,3 @@
-@import url(https://fonts.googleapis.com/css?family=Abel);
-
-.main-header .navbar-nav li:last-child { display: none; }
-
-.main-header .logo-lg { line-height: 47px; }
-.main-header .logo-lg b{ position: relative; font-family: 'Abel', sans-serif; font-size: 21px; }
-
-.sidebar .user-panel:first-child { display: block; background: #1a2226; padding: 15px; border-bottom: 1px solid #161c1f; }
-.sidebar .user-panel:first-child span { display: block; padding-top: 5px; font-size: 12px; color: #687277; }
-.sidebar .user-panel:first-child span a { color: #a0aaaf; }
-
-.sidebar-menu .header { display: none; }
-
-.menu-main-sidebar-container .fa.fa-chevron-right { color: #667075; }
-
 @font-face {
   font-family: 'Material Icons';
   font-style: normal;
@@ -119,9 +104,9 @@
 
 
 
-/*.btn.btn-flat:not(.btn-link), .btn-default.btn-flat:not(.btn-link) {
-  color: rgba(0,0,0,.84);
-}*/
+// .btn.btn-flat:not(.btn-link), .btn-default.btn-flat:not(.btn-link) {
+//   color: rgba(0,0,0,.84);
+// }
 
 #btn_upload{
   color: white;
@@ -131,10 +116,9 @@
 }
 
 #img_search{
-  /*width: 295px;*/
+  width: 295px;
   height: 92px;
   padding-left: 18px;
-  margin-bottom: 5px;
 }
 
 .progress {
@@ -181,7 +165,7 @@ canvas#image_preview {
 
 #font_color{
   background-color: white;
-  /*max-width: 60px;*/
+  max-width: 60px;
 }
 
 #text_shadow{
@@ -278,8 +262,6 @@ header#header {
 
 #inner_results {
   margin-left: 2px;
-  border-right: 1px solid rgba(3, 169, 244, 0.25);
-  padding-right: 4px;
 }
 
 body{
@@ -351,7 +333,7 @@ span.select2.select2-container.select2-container--default.select2-container--bel
   display: block;
   margin-top: 6px;
   margin-right: -6px;
-  /*float: right;*/
+  float: right;
 }
 
   .rd-icon-lg{
@@ -513,34 +495,4 @@ span.select2.select2-container.select2-container--default.select2-container--bel
   padding-top: 130px;
   padding-bottom: 20px;
   margin-left: 4px;
-}
-
-.updated {
-    border-left-color: #46b450;
-    background: #fff;
-    border-left: 4px solid #46b450;
-    -webkit-box-shadow: 0 1px 1px 0 rgba(0,0,0,.1);
-    box-shadow: 0 1px 1px 0 rgba(0,0,0,.1);
-    margin: 5px 15px 2px;
-    padding: 1px 12px;
-}
-
-.input-group-addon .rd-icon-search.rd-icon-lg {
-  padding: 0;
-  margin: 0;
-  margin-top: -6px;
-}
-
-.dtp-btn-cancel{
-  background-color: #f39c12;
-  border-color: #e08e0b;
-  margin-left: 4px;
-  color: white;
-}
-
-.dtp-btn-ok {
-  margin-left: 4px;
-  background-color: #00a65a;
-  color: white;
-  border-color: #008d4c;
 }

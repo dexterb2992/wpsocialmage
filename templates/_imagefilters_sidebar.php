@@ -1,10 +1,10 @@
-<div class="mui-row">
-	<div class="mui-col-md-12">
-		<div class="mui-text-headline mui-text-black" id="filter_type_name">Default Effects</div>
+<div class="row">
+	<div class="col-md-12">
+		<div class="text-headline lead text-black" id="filter_type_name">Default Effects</div>
 	</div>
 </div>
-<div class="mui-row">
-	<div class="mui-col-md-12">
+<div class="row">
+	<div class="col-md-12">
 
 		<?php
 			include "_filters.php";

@@ -29,6 +29,7 @@ if( !function_exists('get_social_mage_current_settings') ){
 
 		$user_id = get_current_user_id();
 		$sql = "SELECT * FROM $wpdb->wp_social_mage_settings WHERE wp_user_id=".get_current_user_id()." LIMIT 1";
+		
 		$settings = $wpdb->get_results($sql, ARRAY_A);
 		if( $dataType == 'json' )
 			return json_encode($settings);

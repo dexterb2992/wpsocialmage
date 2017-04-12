@@ -73,32 +73,6 @@
 			</div>
 			<br/>
 			<div class="row">
-				<div class="col-md-6">
-					<div class="form-group">
-						<label class="form-floating-label">StrokeSize</label>
-
-						<select class="form-control select2 select min-62" id="stroke_size">
-							<?php 
-								for($x = 1; $x <= 8; $x++){
-									if( ( isset($_GET['stroke_size']) && $_GET['stroke_size'] == $x ) || $x == 2){
-										echo '<option selected>'.$x.'</option>';
-									}else{
-										echo '<option>'.$x.'</option>';
-									}
-								}
-							?>
-						</select>
-					</div>
-				</div>	
-				<div class="col-md-6">
-					<div class="form-group">
-			    		<label class="form-floating-label">StrokeColor</label>
-			    		<input type="text" id="text_shadow" class="form-control not-empty" value="#000000" readonly />
-			    	</div>
-				</div>
-			</div>
-			<br/>
-			<div class="row">
 				<div class="col-md-12">
 					<div class="form-group">
 						<label class="form-floating-label">Top Text</label>
@@ -126,6 +100,32 @@
 						<textarea class="form-control" data-toggle="tooltip" data-original-title="Add your custom water mark (example: wwww.mywebsite.com)" id="bottom_watermark"></textarea>
 					</div>
 				</div>	
+			</div>
+
+			<div class="row">
+				<div class="col-md-6">
+					<div class="form-group">
+						<label class="form-floating-label">StrokeSize</label>
+
+						<select class="form-control select2 select min-62" id="stroke_size">
+							<?php 
+								for($x = 1; $x <= 8; $x++){
+									if( ( isset($_GET['stroke_size']) && $_GET['stroke_size'] == $x ) || $x == 2){
+										echo '<option selected>'.$x.'</option>';
+									}else{
+										echo '<option>'.$x.'</option>';
+									}
+								}
+							?>
+						</select>
+					</div>
+				</div>	
+				<div class="col-md-6">
+					<div class="form-group">
+			    		<label class="form-floating-label">StrokeColor</label>
+			    		<input type="text" id="text_shadow" class="form-control not-empty" value="#000000" readonly />
+			    	</div>
+				</div>
 			</div>
 			
 		</div>
