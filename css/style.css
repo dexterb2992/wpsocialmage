@@ -525,6 +525,12 @@ span.select2.select2-container.select2-container--default.select2-container--bel
     padding: 1px 12px;
 }
 
+.wpsm-addon{
+    padding: 0 !important;
+    background: none !important;
+    border: none !important;
+}
+
 .input-group-addon .rd-icon-search.rd-icon-lg {
   padding: 0;
   margin: 0;

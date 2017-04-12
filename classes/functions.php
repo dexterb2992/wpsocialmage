@@ -171,9 +171,9 @@ if( !function_exists('saveCanvas') ){
 
 		if( isset($_INPUT['data_action']) && $_INPUT['data_action'] == "save" ){
 			$filename = get_current_user_id()."_".time().'.png';
-			$file_path = WP_SM_ABS_PATH.'uploads/'.$filename;
+			$file_path = WP_SM_ABS_PATH.'uploads/user_'.get_current_user_id()."/".$filename;
 		}else{
-			$file_path = WP_SM_ABS_PATH.'uploads/'.$_INPUT['filename'];
+			$file_path = WP_SM_ABS_PATH.'uploads/user_'.get_current_user_id()."/".$_INPUT['filename'];
 			if( file_exists($file_path) ){
 				unlink($file_path);
 			}
@@ -199,6 +199,7 @@ if( !function_exists('saveCanvas') ){
 		
 	}
 }
+
 
 // let's renew the user's access token every time the user logs in.
 if( !function_exists('update_user_access_token') ){

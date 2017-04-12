@@ -957,7 +957,8 @@
 
 
         $('#form_upload_image').ajaxForm({
-            url: wpSocialMageUploadUrl, // point to server-side PHP script 
+            // url: wpSocialMageUploadUrl, // point to server-side PHP script 
+            url: ajaxurl,
             dataType: 'json',  // what to expect back from the PHP script, if anything
             cache: false,
             assync: false,
@@ -984,7 +985,7 @@
                 var data = xhr.responseJSON;
                 $(function() {
                     // $.snackbar({ content: data.msg, timeout: 4000});
-                    console.log(data.msg);
+                    console.log(data);
                     $('.image-preview').attr("src", uploadsUrl+data.filename);
 
                     var url = location.href;

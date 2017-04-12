@@ -14,10 +14,7 @@
 					</div>
 					<div class="rd-gallery">
 					<?php 
-						if ( !file_exists(WP_SM_ABS_PATH."uploads/user_".get_current_user_id()) ) {
-						    mkdir(WP_SM_ABS_PATH."uploads/user_".get_current_user_id()."/", 0755, true);
-						}
-						$files = glob(WP_SM_ABS_PATH.'uploads/user_'.get_current_user_id().'/*.{jpg,png}', GLOB_BRACE);
+						$files = glob(WP_SM_UPLOADS_FOLDER_ABS_PATH . '*.{jpg,png}', GLOB_BRACE);
 
 						if( count($files) < 1 ){
 							echo '<h4>No image available.</h4>';
@@ -64,7 +61,7 @@
 						<div class="input-group">
 	                    	<!-- <input type="text" class="form-control"> -->
 							<input type="text" class="form-control" id="img_search" placeholder="Enter keyword" name="keyword" />
-							<span class="input-group-addon no-border">
+							<span class="wpsm-addon input-group-addon no-border">
 	                          <!-- <input type="checkbox"> -->
 	                          	<div class="rd-icon-search rd-icon-lg">
 									<span>

@@ -54,7 +54,7 @@ function wp_social_mage_admin_menu() {
     /* Register our script. */
     wp_register_script( 'moment.js', plugins_url( '/js/moment.js', __FILE__ ) );
     wp_register_script( 'bootstrap-material-datetimepicker.js', plugins_url( '/js/bootstrap-material-datetimepicker.js', __FILE__ ) );
-    wp_register_script( 'mui.min.js', plugins_url( '/js/mui.min.js', __FILE__ ) );
+    // wp_register_script( 'mui.min.js', plugins_url( '/js/mui.min.js', __FILE__ ) );
     wp_register_script( 'jquery.form.js', plugins_url( '/js/jquery.form.js', __FILE__ ) );
     wp_register_script( 'snackbar.min.js', plugins_url( '/js/snackbar.min.js', __FILE__ ) );
     wp_register_script( 'jquery-ui.js', plugins_url( '/js/jquery-ui.js', __FILE__ ) );
@@ -90,6 +90,22 @@ function wp_social_mage_admin_menu() {
 
     add_action('admin_print_scripts-' . $page_hook_suffix, 'wp_social_mage_admin_scripts');
     add_action('admin_print_styles-' . $page_hook_suffix, 'wp_social_mage_plugin_styles');
+
+    /* let's create our uploads directory */
+    $upload = wp_upload_dir();
+    $upload_dir = $upload['basedir'];
+    $upload_dir = $upload_dir . '/wp-social-mage/';
+    if (! is_dir($upload_dir)) {
+        mkdir( $upload_dir, 0755 );
+    }
+
+    if( is_dir($upload_dir) ){
+        // create each user's uploads directory
+        $user_upload_path = $upload_dir.'user_'.get_current_user_id().'/';
+        if( !is_dir($user_upload_path) ){
+            mkdir($user_upload_path, 0755);
+        }
+    }
 }
 
 
@@ -98,7 +114,7 @@ function wp_social_mage_admin_scripts() {
     /* Link our already registered script to a page */
     wp_enqueue_script( 'moment.js' );
     wp_enqueue_script( 'bootstrap-material-datetimepicker.js' );
-    wp_enqueue_script( 'mui.min.js' );
+    // wp_enqueue_script( 'mui.min.js' );
     wp_enqueue_script( 'jquery.form.js' );
     wp_enqueue_script( 'snackbar.min.js' );
     wp_enqueue_script( 'jquery-ui.js' );

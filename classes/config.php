@@ -5,6 +5,8 @@ if( !defined('ABSPATH') ){
 	include( dirname( dirname ( dirname( dirname( dirname(__FILE__) ) ) ) )."/wp-load.php" );
 }
 
+$wp_dir = wp_upload_dir();
+
 define('WP_SM_FOLDER_NAME', basename( dirname( dirname(__FILE__) ) )."/" );
 define('WP_SM_CONTENT_URL', dirname( dirname ( dirname( dirname( dirname(__FILE__) ) ) ) ).'/wp-content/');
 define('WP_SM_PLUGINS_PATH', dirname( dirname ( dirname( dirname( dirname(__FILE__) ) ) ) ).'/wp-content/plugins/');
@@ -13,9 +15,11 @@ define('WP_SM_ABS_PATH', plugin_dir_path( dirname( __FILE__ ) ));
 define('WP_SM_CLASSES_FOLDER', WP_SM_ABS_PATH."classes/");
 define('WP_SM_BASE_URL',  plugins_url(WP_SM_FOLDER_NAME));
 define('WP_SM_HOST_NAME', dirname( dirname( dirname(WP_SM_BASE_URL) ) ));
-define('WP_SM_UPLOADS_FOLDER', WP_SM_BASE_URL.'uploads/');
 define('WP_SM_IMAGES_FOLDER', WP_SM_BASE_URL.'images/');
-define('WP_SM_UPLOADS_FOLDER_ABS_PATH', WP_SM_ABS_PATH."uploads/");
+
+// define('WP_SM_UPLOADS_FOLDER', WP_SM_BASE_URL.'uploads/user_'.get_current_user_id().'/');
+define('WP_SM_UPLOADS_FOLDER', $wp_dir['baseurl'].'/wp-social-mage/user_'.get_current_user_id().'/');
+define('WP_SM_UPLOADS_FOLDER_ABS_PATH', $wp_dir['basedir'].'/wp-social-mage/user_'.get_current_user_id().'/');
 
 define('WP_SM_PIXABAY_USERNAME', 'dexterb2992');
 define('WP_SM_PIXABAY_KEY', '1362230-a0032011b620800873c110448');

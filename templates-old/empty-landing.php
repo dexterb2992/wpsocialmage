@@ -1,3 +1,4 @@
+<?php var_dump(WP_SM_UPLOADS_FOLDER_ABS_PATH); ?>
 <div class="mui-row">
 	<div class="mui-col-md-7" id="wp_social_mage_results">
 		
@@ -7,7 +8,11 @@
 			</div>
 			<div class="rd-gallery">
 			<?php 
-				$files = glob(WP_SM_ABS_PATH.'uploads/*.{jpg,png}', GLOB_BRACE);
+				// if ( !file_exists(WP_SM_ABS_PATH."uploads/user_".get_current_user_id()) ) {
+				//     mkdir(WP_SM_ABS_PATH."uploads/user_".get_current_user_id()."/", 0755, true);
+				// }
+
+				$files = glob(WP_SM_UPLOADS_FOLDER_ABS_PATH . '*.{jpg,png}', GLOB_BRACE);
 
 				if( count($files) < 1 ){
 					echo '<h4>No image available.</h4>';
@@ -53,7 +58,8 @@
 		</div>
 
 		<form id="form_upload_image" action="js/upload.php" method="post" enctype="multipart/form-data" class="mui-form-inline" style="margin-bottom: 12px;">
-
+			<input type="hidden" name="q" value="upload_image" />
+			<input type="hidden" name="action" value="WpSocialMageAjax" />
 			<div class="mui-row">
 				<div class="mui-col-md-12" style="margin-bottom: 5px;">
 					<input type="file" name="image" id="select_image" class="mui-form-control" accept="image/gif,image/jpeg,image/png">

@@ -8,49 +8,91 @@ include WP_SM_CLASSES_FOLDER."functions.php"; // this is where we can find all t
 $q = $_POST['q'];
 $response = "{}";
 
-if( $q == "save_canvas" ){
+switch ($q) {
+	case 'save_canvas':
+		$response = saveCanvas($_POST['imgBase64'], $_POST);
+		break;
+	
+	case 'save_schedule':
+		$response = saveSchedule($_POST);
+		break;
 
-	$response = saveCanvas($_POST['imgBase64'], $_POST);
+	case 'get_long_live_token':
+		$response = getLongLiveFBToken($_POST);
+		break;
 
-}else if( $q == "save_schedule" ){
+	case 'generate_longlive_token':
+		$response = generateLongLiveFBToken($_POST);
+		break;
 
-	$response = saveSchedule($_POST);
+	case 'image_search':
+		$response = searchImages($_POST['query']);
+		break;
 
-}else if( $q == "get_long_live_token" ){
-	$response = getLongLiveFBToken($_POST);
+	case 'delete_image':
+		$response = deleteImage($_POST['filename']);
+		break;
 
-}elseif( $q == "generate_longlive_token" ){
-	$response = generateLongLiveFBToken($_POST);
+	case 'grab_image_from_url':
+		$response = grabImageFromUrl($_POST['src']);
+		break;
 
-}elseif( $q == "image_search" ){
-	$response = searchImages($_POST['query']);
+	case 'get_user_type':
+		$response = getUserAccess($_POST['type']);
+		break;
 
-}elseif ( $q == "delete_image" ) {
+	case 'set_timezone':
+		$response = setTimezone($_POST['timezone']);
+		break;
 
-	$response = deleteImage($_POST['filename']);
+	case 'get_settings':
+		$response = get_social_mage_current_settings();
+		break;
 
-}elseif ( $q == "grab_image_from_url" ) {
+	case 'update_settings':
+		$response = updateSettings($_POST);
+		break;
 
-	$response = grabImageFromUrl($_POST['src']);
+	case 'upload_image':
+		if(!isset($_FILES['image'])){
+			$response = array(
+				'status' => 'failed',
+				'msg' => 'No image specified.'
+			);
+			break;
+		}
 
-}elseif ( $q == "get_user_type" ){
-	$response = getUserAccess($_POST['type']);
 
-}else if( $q == "set_timezone" ){
+		if ( 0 < $_FILES['image']['error'] ) {
+		    $response = array('status' => 'failed', 'msg' => 'Error: '.$_FILES['image']['error'].'<br>'); 
+		}else {
+			if( file_exists($_FILES['image']['name']) ){
+				$var = explode('.', $_FILES['image']['name']);
+				$_FILES['image']['name'] = $var[0].time().$var[1];
+			}
 
-	$response = setTimezone($_POST['timezone']);
+			$target = WP_SM_UPLOADS_FOLDER_ABS_PATH . $_FILES['image']['name']);
 
-}else if( $q == "get_settings" ){
+		    if( move_uploaded_file($_FILES['image']['tmp_name'], $target ){
+		    	$response = array(
+		    		'status' => 'success', 
+		    		'msg' => $_FILES['image']['name']." uploaded successfully.", 
+		    		'filename' => $_FILES['image']['name']
+		    	);
+		    }else{
+		    	$response = array(
+		    		'status' => 'failed', 
+		    		'msg' => 'Unable to upload image to target path.', 
+		    		'info' => array('target' => $target)
+		    	);
+		    }
+		}
 
-	$response = get_social_mage_current_settings();
 
-}else if( $q == "update_settings" ){
-
-	$response = updateSettings($_POST);
+		$response = json_encode($response);
+		break;
 
 }
 
 echo trim($response);
 die;
-
-?>
