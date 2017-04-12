@@ -1,0 +1,116 @@
+version 1.1.0
+	- updated the social_mage_activity_log table.
+	- deleted option that holds the license key when the plugin is deactivated.
+	- deleted wp_sm_email and wp_sm_lkey options
+
+version 1.1.1
+	- removed fb_app_id, fb_user_id, fb_token from activity_log table
+	- renamed getCurrentSettings to get_social_mage_current_settings
+	- changed user_id to wp_user_id
+	- removed unused functions
+	- fixed error response on generating longlive token from first FB Login
+	- added function to generate longlive token when app_id and app_secret is not set on db
+	- fixed issue on saving the shortlive token instead of newly generated longlive token
+
+version 1.1.2
+	- filtered groups to show only the ones that a user is admin
+
+version 1.1.3
+	- fix goups filtering
+	- checked if pages, groups and albums has pagination, then grab the next page's content, since
+	  in 1.1.2, the maximum number of groups, pages & albums that can be grabbed is only 25, so
+	  in 1.1.3 this has been changed and enable to grab all groups, pages & albums
+
+version 1.1.4
+	- added description
+
+version 1.1.5
+	- added $data = preg_replace('/[\x00-\x1F\x80-\xFF]/', '', $data); line 116 in lic.php
+
+
+version 1.1.7
+	- fixed error during setting fb app & timezone on settings page
+
+version 1.1.8
+	- exits if image does not exist
+	- prevent image from re-rendering when no effect has been added
+	- prevent image from resizing when its dimension is already 518x270
+
+version 1.1.9
+	- fixed text alignment cause by the uploaded image whose size is larger than 500x500
+
+version 1.2.0
+	- fixed image dimension from search results
+	- commendted unistall_hook
+
+version 1.2.1
+	- fixed bugs on where to post fields.
+	- added increase/decrease buttons on filters page.
+	- auto upload after browsing for an image.
+
+version 1.2.2
+	- fixed posting image as page with a link attached to it.
+	- prevent duplicate post when posting the image with a link attached.
+
+version 1.2.3
+	- fixed getting user access function.
+
+version 1.2.4
+	- sharpen text after image rendering
+
+version 1.2.5
+	- fixed text alignment resulted from 1.2.4.
+	- fixed posting to multiple pages - removed duplicates.
+	
+version 1.2.6 (changes made to accomodate issues with rebrander)
+	- deleted /wp-social-mage/index.php (empty file anyway).
+	- renamed /wp-social-mage/wp-social-mage.php to /wp-social-mage/index.php.
+	- renamed /wp-social-mage/wp-social-mage-dashboard.php to /wp-social-mage/dashboard.php.
+	- changed reference to wp-social-mage-dashboard.php in line 98 of index.php to dashboard.php.
+ 	- removed version reference and package reference from lines 3-4 in /wp-social-mage/index.php because these lines were not getting updated in the rebranding process (those references are unnecessary anyway).
+	- renamed Plugin URI in line 8 of /wp-social-mage/index.php from http://topdogimsoftware.com/review to http://topdogwpsocialmage.com (we want to avoid referencing topdogimsoftware.com to prevent customer from thinking about doing Search & Replace for that domain string.
+	- gutted "www.topdogimsoftware.com" and "http://www.topdogimsoftware.com" references from line 8 of /wp-social-mage/templates/_header.php to prevent leaving that reference after rebranding. Our domain is referenced in the header as topdogwpsocialmage.com - which is sufficient for the regular unrebranded version.
+	- changed line 1 of /wp-social-mage/dashboard.php to read simply <!-- START Dashboard --> (removing reference to WP Social Mage)
+	- changed lines 43 and 44 of /wp-social-mage/index.php changing reference to "wp-social-mage-dashboard" to "dashboard".
+
+version 1.2.7
+	- added close php tag to lic.php
+	- added function to get plugin info (Name, PluginURI, etc.)
+
+version 1.2.8
+	- moved fontsize buttons to the top
+
+version 1.2.9
+	- added 'var' on app.js line 374-375
+	- removed sidebar logo
+
+
+version 1.3.0
+	- fix image not resizing properly.
+	- removed restriction traing & support pages if fb settings is not set.
+	- added support to php 5.2 when validating license key (5.2 version of http_build_query)
+	- change clickable size from 518x270 to 487x255
+	
+version 1.3.1
+	- fix validation not working because it returns fail_safe_message to some servers.
+
+
+version 1.3.2
+	- added error snackbars in app.js
+	- fix error on "Save & Connect to FB"
+
+version 1.3.3
+	- added channelUrl on FB.init
+	- added error message, during submitting email and licensekey, if php version is lower than 5.2.0. Validation code will not work due to using json_decode, available at 5.2.0 and above, when checking topdog server response.
+
+version 1.3.4
+	- make top, bottom & watermark texts draggable
+	- updated pixabay api key
+	- added delete on functions.php line 124 - 126
+
+version 1.3.5
+	- fixed issue when generating access token fails on app.js line 2089-2168
+
+version 1.3.7
+	- replaced default crawling method file_get_contents with curl > functions.php
+	- renamed #save_settings to #wp_sm_save_settings
