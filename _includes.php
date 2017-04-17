@@ -4,16 +4,15 @@
 ?>
 
 <script type="text/javascript">
-	var wpSocialMageAjaxUrl = "<?php echo plugins_url( '/js/ajax.php', __FILE__ ); ?>";
-	var wpSocialMageUploadUrl = "<?php echo plugins_url( '/js/upload.php', __FILE__ ); ?>";
 	var imagesUrl = "<?php echo plugins_url( '/images/', __FILE__ ); ?>";
-	var uploadsUrl = "<?php echo plugins_url( '/uploads/', __FILE__ ); ?>";
+	var uploadsUrl = "<?php echo WP_SM_UPLOADS_FOLDER; ?>";
 	var channelUrl = "<?php echo plugins_url( '/js/fb/channel.php', __FILE__ ); ?>";
 	var $image_width = 500, $image_height = 500, $w = 500, $h = 500;
 	window.fbAppId = "<?php echo WP_SM_FB_APP_ID; ?>";
 	window.fbLimit = 100;
 	window.fbHost = "https://graph.facebook.com/";
 	var currentTimezone = '<?php echo WP_SM_CURRENT_TIMEZONE; ?>';
+	var $imageFilename = "<?php echo isset($_GET['image']) ? $_GET['image'] : ''; ?>";
 </script>
 
 

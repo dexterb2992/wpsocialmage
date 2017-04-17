@@ -231,6 +231,22 @@
 
         function get_albums(userId){
             console.log("get_albums is called");
+            // FB.api(
+            //     "/"+userId+"/albums",
+            //     function (response) {
+            //         console.log(response);
+            //         if( response.hasOwnProperty('data') ){
+            //             if(response.data.length < 1){
+            //                 show_results_for_albums();
+            //             }
+            //         }
+
+            //         if (response && !response.error) {
+            //             get_graph_api_request_assync(response, "albums", show_results_for_albums);
+            //         }
+            //     }
+            // );
+
             $.ajax({
                 url: 'https://graph.facebook.com/'+fbUserId+'/albums?fields=id,can_upload,name&access_token='+fbAccessToken,
                 type: 'get',
@@ -334,6 +350,7 @@
         }
 
         function postPhoto(albumId){
+            console.log("album: "+albumId);
             if( albumId !== 0 ){
 
                 // let's upload the image
@@ -360,63 +377,206 @@
                     fd.append("access_token", fbAccessToken);
                     fd.append("source", blob);
                     fd.append("message", $("#post_title").val());
-                    fd.append("link", $("#target_url").val());
-
-                    var graphUrlExt = "photos";
-
-                    if( $.trim( $("#target_url").val() ) != "" ){
-                        graphUrlExt = "feed";
-                        fd.append("picture", window.uploadsUrl+$imageFilename);
-                    }
-
 
                     try {
                         var btn = $("#post_to_fb");
 
                         btn.html("Please wait...").addClass("disabled").attr("disabled", "disabled");
 
-                        $.each(whereToPost, function(i, row){
-                            var check_if_page = $.inArray(row, pages_array);
-                            // Make sure not to include page
-                            if( check_if_page < 0 ){
-                                console.log("row: "+row);
-                                if( row == "me" ){ // Wall
-                                    if( typeof(albumId) != 'undefined' && albumId != null  && albumId !== 0 ){
-                                        row = albumId;
-                                    }
-                                }
+                        $.ajax({
+                            assync: false,
+                            url: "https://graph.facebook.com/"+albumId+"/photos",
+                            type: "POST",
+                            data: fd,
+                            processData: false,
+                            contentType: false,
+                            cache: false,
+                            beforeSend : function (){
+                                btn.html("Uploading...").addClass("disabled").attr("disabled", "disabled");
+                            },
+                            success: function (data) {
+                                console.log(data);
+                                var imgUploadedId = data.id;
+                                var imgPostId = data.post_id;
+                                console.log("imgUploadedId: "+imgUploadedId);
+
                                 
-                                var request = $.ajax({
-                                    assync: false,
-                                    url: "https://graph.facebook.com/"+row+"/"+graphUrlExt,
-                                    type: "POST",
-                                    data: fd,
-                                    processData: false,
-                                    contentType: false,
-                                    cache: false,
-                                    beforeSend: function (){
-                                        console.log("posting to "+row+' feed...');
-                                    },
-                                    success: function (data){
-                                        console.log("response when target_url is not empty:");
-                                        console.log(data);
-                                    },
-                                    error: function (shr, status, data){
-                                        if( row == "me" ){
-                                            $.snackbar({content: "Failed when posting to wall. Please try again later. "+data+" status "+shr.status, timeout: 4000});
-                                        }else{
-                                            $.snackbar({content: "Failed when posting to group. "+data+" status "+shr.status, timeout: 4000});
-                                        }
-                                        console.log("Error when posting to "+row+" feed. "+data+" status "+shr.status);
+
+
+                                FB.api(fbUserId+"/picture?id="+imgUploadedId, function(response1){
+                                    console.log(" let's get the url of the newly uploaded image...");
+                                    console.log(response1);
+                                    if( data.hasOwnProperty('error') ){
+                                        console.log("ERROR while fetching url of newly uploaded user photo.");
+                                        $.snackbar({ content: "ERROR while fetching url of newly uploaded user photo.", timeout: 4000});
+                                    }else{
+                                        imgUploadedUrl= response1.data.url;
+                                        // if (response && !response.error) {
+                                            /* handle the result */
+                                            // var imgUploadedUrl = response.source;
+                                            // var imgUploadedLink = response.link;
+
+                                            // let's choose where we want it to be posted
+                                            if( $("#target_url").val() !== "" ){  // this means, the image should be clickable
+                                                console.log("/we are posting inside IF when target_url is not empty");
+                                                console.log("whereToPost: ");
+                                                console.log(whereToPost);
+                                                try{
+                                                   
+                                                    var newImgURL = "";
+
+                                                    window.ajax_requests_for_feed_posting = [];
+                                                    $.each(whereToPost, function(i, row){
+                                                        var check_if_page = $.inArray(row, pages_array);
+                                                        // Make sure not to include page
+                                                        if( check_if_page < 0 ){
+
+                                                            var request = $.ajax({
+                                                                            url: 'https://graph.facebook.com/'+row+'/feed',
+                                                                            type: 'post',
+                                                                            assync: false,
+                                                                            data: {
+                                                                                name: $("#post_title").val(),
+                                                                                picture: imgUploadedUrl,
+                                                                                link: $("#target_url").val(),
+                                                                                description: $("#post_description").val(),
+                                                                                message : $("#post_message").val(),
+                                                                                access_token: fbAccessToken
+                                                                            },
+                                                                            beforeSend: function (){
+                                                                                console.log("posting to "+row+' feed...');
+                                                                            },
+                                                                            success: function (data){
+                                                                                console.log("response when target_url is not empty:");
+                                                                                console.log(data);
+                                                                            },
+                                                                            error: function (shr, status, data){
+                                                                                if( row == "me" ){
+                                                                                    $.snackbar({content: "Failed when posting to wall. Please try again later. "+data+" status "+shr.status, timeout: 4000});
+                                                                                }else{
+                                                                                    $.snackbar({content: "Failed when posting to group. "+data+" status "+shr.status, timeout: 4000});
+                                                                                }
+                                                                                console.log("Error when posting to "+row+" feed. "+data+" status "+shr.status);
+                                                                            }
+                                                                        });
+                                                            
+                                                            window.ajax_requests_for_feed_posting.push(request);
+                                                        }
+                                                    });
+                                                    
+                                                    window.user_image_is_deleted = false;
+                                                    $(document).ajaxStop(function (){
+                                                        // let's delete the image post to prevent duplicate posts
+                                                        if( $.trim( $("#target_url").val() ) !== "" ){
+                                                            if( window.user_image_is_deleted === false ){
+                                                                $.ajax({
+                                                                    url: "https://graph.facebook.com/"+imgUploadedId+"?method=DELETE&access_token="+fbAccessToken,
+                                                                    type: 'post',
+                                                                    processData: false,
+                                                                    contentType: false,
+                                                                    cache: false,
+                                                                    beforeSend: function (){
+                                                                        console.log("deleting user image now...");
+                                                                    },
+                                                                    success: function (data){
+                                                                        console.log(data);
+                                                                        window.user_image_is_deleted = true;
+                                                                    },
+                                                                    error: function(shr, status, data){
+                                                                        console.log("Error while deleting user image." + data + " Status " + shr.status);
+                                                                    },
+                                                                    complete: function (data){
+                                                                        console.log(data);
+                                                                        console.log("completed");
+                                                                    }
+                                                                });
+                                                            }
+                                                        }
+                                                    });
+                                                    
+                                                    
+                                                }catch(Exception){
+                                                    console.log("ERROR: ");
+                                                    console.log(Exception);
+                                                }
+                                            }else{
+                                                $.ajax({
+                                                    url: 'https://graph.facebook.com/v2.5/'+imgUploadedId+'?fields=link&access_token='+fbAccessToken,
+                                                    type: 'get',
+                                                    assync: false,
+                                                    dataType: 'json',
+                                                    beforeSend: function (){
+                                                        console.log("fecthing "+imgUploadedId+" photo details...");
+                                                    },
+                                                    success: function (data){
+                                                        console.log(data);
+                                                        $.each(whereToPost, function(i, row){
+                                                            var check_if_page = $.inArray(row, pages_array);
+                                                           
+
+                                                            // Make sure not to include page
+                                                            if( check_if_page < 0 ){
+                                                                FB.api('/'+row+'/feed', 'post', {
+                                                                    message: $("#post_title").val(),
+                                                                    // link: imgUploadedLink
+                                                                    link: data.link,
+                                                                    // picture: imgUploadedUrl
+                                                                    }, function (response) {
+                                                                        console.log(response);
+                                                                        if (response && !response.error) {
+                                                                            /* handle the result */
+                                                                            console.log("Posted to "+row+" feed.");
+                                                                            if( row == "me" ){
+                                                                                $.snackbar({content: "Posted to wall successfully.", timeout: 4000});
+                                                                            }
+                                                                        }else{
+                                                                            color.log("Sorry, something went wrong while posting to "+row+" feed");
+                                                                            console.log(response);
+                                                                        }
+                                                                    }
+                                                                );
+                                                            }
+                                                            
+                                                        });
+                                                    },
+                                                    error: function (shr, status, data){
+                                                        console.log("Error: "+data+" Status "+shr.status);
+                                                    }
+                                                });
+
+                                               
+
+                                                
+                                            }
+                                        // }
                                     }
                                 });
+                            },
+                            error: function (shr, status, data) {
+                                console.log("error " + data + " Status " + shr.status);
+                                // alert("Failed to post on facebook. Please try again later.");
+                                $.snackbar({ content: "Failed to post on facebook. Please try again later.", timeout: 4000});
+                                btn.removeAttr("disabled").removeClass("disabled").html("POST");
+                            },
+                            complete: function () {
+                                console.log("Posted to facebook");
+                                // alert("Posted to facebook successfully.");
+                                // $.snackbar({ content: "Posted to facebook successfully.", timeout: 4000});
+                                btn.removeAttr("disabled").removeClass("disabled").html("POST");
                             }
                         });
                         
+                        
                         FB.api(fbUserId+'/accounts', function(data){
+                            // window.pages_access_tokens = data.data;
+
                             if( data.hasOwnProperty('data') ){
                                 window.pages_access_tokens = data.data;
+                                // $.each(data.data, function (i, row){
+                                //     window.pages_access_tokens[row.id] = row.access_token;
+                                // });
                             }
+                            // var page_access_token = data.data[0].access_token;
                             
                             console.log("window.pages_access_tokens: ");
                             console.log(window.pages_access_tokens);
@@ -505,23 +665,23 @@
                                                                     $.snackbar({ content: "Posted to facebook page successfully.", timeout: 4000});
                                                                     page_success_flag = true;
                                                                     // if success, let's delete the photo post to hide it on the timeline
-                                                                    // $.ajax({
-                                                                    //     url: "https://graph.facebook.com/"+pageImgUploadedId+"?method=DELETE&access_token="+page_access_token,
-                                                                    //     type: "post",
-                                                                    //     processData: false,
-                                                                    //     contentType: false,
-                                                                    //     cache: false,
-                                                                    //     beforeSend: function (){
-                                                                    //         console.log("deleting image now...");
-                                                                    //     },
-                                                                    //     success: function (data){
-                                                                    //         console.log(data);
-                                                                    //     },
-                                                                    //     error: function (shr, status, data){
-                                                                    //         console.log("error " + data + " Status " + shr.status);
-                                                                    //         btn.removeAttr("disabled").removeClass("disabled").html("POST");
-                                                                    //     }
-                                                                    // });
+                                                                    $.ajax({
+                                                                        url: "https://graph.facebook.com/"+pageImgUploadedId+"?method=DELETE&access_token="+page_access_token,
+                                                                        type: "post",
+                                                                        processData: false,
+                                                                        contentType: false,
+                                                                        cache: false,
+                                                                        beforeSend: function (){
+                                                                            console.log("deleting image now...");
+                                                                        },
+                                                                        success: function (data){
+                                                                            console.log(data);
+                                                                        },
+                                                                        error: function (shr, status, data){
+                                                                            console.log("error " + data + " Status " + shr.status);
+                                                                            btn.removeAttr("disabled").removeClass("disabled").html("POST");
+                                                                        }
+                                                                    });
                                                                 },
                                                                 error: function (shr, status, data) {
                                                                     console.log("error " + data + " Status " + shr.status);
@@ -536,27 +696,27 @@
                                                                     
                                                                     // if( page_success_flag === true ){
                                                                         // if success, let's delete the photo post to hide it on the timeline
-                                                                        // $.ajax({
-                                                                        //     url: "https://graph.facebook.com/"+pageImgUploadedId+"?method=DELETE&access_token="+page_access_token,
-                                                                        //     type: "post",
-                                                                        //     processData: false,
-                                                                        //     contentType: false,
-                                                                        //     cache: false,
-                                                                        //     beforeSend: function (){
-                                                                        //         console.log("deleting image now...");
-                                                                        //     },
-                                                                        //     success: function (data){
-                                                                        //         console.log(data);
-                                                                        //     },
-                                                                        //     error: function (shr, status, data){
-                                                                        //         console.log("error " + data + " Status " + shr.status);
-                                                                        //         btn.removeAttr("disabled").removeClass("disabled").html("POST");
-                                                                        //     },
-                                                                        //     complete: function (){
-                                                                        //         // reset the success flag
-                                                                        //         // page_success_flag = false;
-                                                                        //     }
-                                                                        // });
+                                                                        $.ajax({
+                                                                            url: "https://graph.facebook.com/"+pageImgUploadedId+"?method=DELETE&access_token="+page_access_token,
+                                                                            type: "post",
+                                                                            processData: false,
+                                                                            contentType: false,
+                                                                            cache: false,
+                                                                            beforeSend: function (){
+                                                                                console.log("deleting image now...");
+                                                                            },
+                                                                            success: function (data){
+                                                                                console.log(data);
+                                                                            },
+                                                                            error: function (shr, status, data){
+                                                                                console.log("error " + data + " Status " + shr.status);
+                                                                                btn.removeAttr("disabled").removeClass("disabled").html("POST");
+                                                                            },
+                                                                            complete: function (){
+                                                                                // reset the success flag
+                                                                                // page_success_flag = false;
+                                                                            }
+                                                                        });
                                                                     // }
 
                                                                 }
@@ -1660,12 +1820,10 @@
                         $("#div_create_new_album").addClass("invisible").fadeOut(function(){
                             $("#div_choose_existing_album").removeClass("invisible").fadeIn();
                         }); 
-                    }else if( $(this).val() == "create" ){
+                    }else{
                         $("#div_choose_existing_album").addClass("invisible").fadeOut(function(){
                             $("#div_create_new_album").removeClass("invisible").fadeIn();
                         }); 
-                    }else{
-                        $("#div_choose_existing_album, #div_create_new_album").addClass("invisible").fadeOut(); 
                     } 
                 });
 
@@ -1843,8 +2001,6 @@
                     window.location = url+"&image="+data.filename;
                 }else{
                     alert(data.msg);
-                    $this.html("Use this image").css('display', '').addClass('image-from-url')
-                        .attr("href", url);
                 }
             });
         });

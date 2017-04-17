@@ -155,16 +155,22 @@
 			</div>
 			
 			
-			<div class="radio">
-				<label>
-					<input type="radio" name="optionsAlbum" title="Where should we upload this photo?" id="options_album_create" value="create" checked>
+			<div class="form-group">
+				<input type="radio" name="optionsAlbum" title="Where should we upload this photo?" id="options_album_create" value="create" checked>
+				<label for="options_album_create">
 					Create new album
 				</label>
 			</div>
-			<div class="radio">
-				<label>
-					<input type="radio" name="optionsAlbum" title="Where should we upload this photo?" id="options_album_choose" value="choose">
-					Choose existing album
+			<div class="form-group">
+				<input type="radio" name="optionsAlbum" title="Where should we upload this photo?" id="options_album_choose" value="choose">
+				<label for="options_album_choose">
+					Existing album
+				</label>
+			</div>
+			<div class="form-group">
+				<input type="radio" name="optionsAlbum" title="Where should we upload this photo?" id="options_album_none" value="none" />
+				<label for="options_album_none">
+					Post directly
 				</label>
 			</div>
 

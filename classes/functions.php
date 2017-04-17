@@ -1,4 +1,20 @@
 <?php 
+if( !function_exists('is_connected') ){
+	// determines whether the user is connected to the internet or not
+	function is_connected(){
+	    $connected = @fsockopen("www.example.com", 80); 
+	                                        //website, port  (try 80 or 443)
+	    if ($connected){
+	        $is_conn = true; //action when connected
+	        fclose($connected);
+	    }else{
+	        $is_conn = false; //action in connection failure
+	    }
+	    return $is_conn;
+
+	}
+}
+
 if( !function_exists('getPageData') ){
 	function getPageData($url, $allowsHeader = false){
 		if(!function_exists('curl_init')){
@@ -170,10 +186,15 @@ if( !function_exists('saveCanvas') ){
 		global $wpdb;
 
 		if( isset($_INPUT['data_action']) && $_INPUT['data_action'] == "save" ){
-			$filename = get_current_user_id()."_".time().'.png';
-			$file_path = WP_SM_ABS_PATH.'uploads/user_'.get_current_user_id()."/".$filename;
+			if( isset($_INPUT['filename']) ){
+				$filename = pathinfo($_INPUT['filename'], PATHINFO_BASENAME);
+			}else{
+				$filename = get_current_user_id()."_".time().'.png';
+			}
+			
+			$file_path = WP_SM_UPLOADS_FOLDER_ABS_PATH . $filename;
 		}else{
-			$file_path = WP_SM_ABS_PATH.'uploads/user_'.get_current_user_id()."/".$_INPUT['filename'];
+			$file_path = WP_SM_UPLOADS_FOLDER_ABS_PATH . $_INPUT['filename'];
 			if( file_exists($file_path) ){
 				unlink($file_path);
 			}
@@ -186,7 +207,11 @@ if( !function_exists('saveCanvas') ){
 		$fileData = base64_decode($img);
 		//saving
 		
-		if( file_put_contents($file_path, $fileData) ){
+		$fp = fopen($file_path,'w+');
+		fwrite($fp, $fileData);
+		fclose($fp); 
+
+		if( file_exists($file_path) ){
 			return json_encode( array( 'status' => 'success', 'user_id' => get_current_user_id(), 'filename' => $filename ) );
 		}
 		$php_errormsg = error_get_last();
@@ -229,31 +254,6 @@ if( !function_exists('update_user_access_token') ){
 	
 }
 
-// get the longlive access token 
-if( !function_exists('getLongLiveFBToken') ){
-	function getLongLiveFBToken($_INPUT){
-		$shortLiveToken = $_INPUT['short_life_token'];
-
-		$app_id = isset($_INPUT['fb_app_id']) ? $_INPUT['fb_app_id'] : WP_SM_FB_APP_ID;
-		$app_secret = isset($_INPUT['fb_app_secret']) ? $_INPUT['fb_app_secret'] : WP_SM_FB_APP_SECRET;
-
-		$url = "https://graph.facebook.com/oauth/access_token?client_id=$app_id&client_secret=$app_secret&grant_type=fb_exchange_token&fb_exchange_token=".$shortLiveToken;
-		$data = getPageData($url);
-
-		$res = explode('&', $data);
-		$arr = explode('=', $res[0]);
-		$arr2 = explode('=', $res[1]);
-
-		if( $arr[1] !== null && $arr[1] != "" ){
-			update_user_access_token($arr[1]);
-			return json_encode( array( 'status' => '200', "longLiveAccessToken" => $arr[1], "expiresIn" => (int)$arr2[1], "shortLiveAccessToken" => $shortLiveToken ) );
-
-		}
-		
-		return json_encode( array('status' => '500', 'longLiveAccessToken' => null, 'expiresIn' => null, 'msg' => 'Sorry, we can\'t generate a longlive access token right now. Please try again later.') );
-
-	}
-}
 
 if( !function_exists('generateLongLiveFBToken') ){
 	function generateLongLiveFBToken($_INPUT){
@@ -285,6 +285,33 @@ if( !function_exists('generateLongLiveFBToken') ){
 }
 
 
+// get the longlive access token 
+if( !function_exists('getLongLiveFBToken') ){
+	function getLongLiveFBToken($_INPUT){
+		return generateLongLiveFBToken($_INPUT);
+		// $shortLiveToken = $_INPUT['short_life_token'];
+
+		// $app_id = isset($_INPUT['fb_app_id']) ? $_INPUT['fb_app_id'] : WP_SM_FB_APP_ID;
+		// $app_secret = isset($_INPUT['fb_app_secret']) ? $_INPUT['fb_app_secret'] : WP_SM_FB_APP_SECRET;
+
+		// $url = "https://graph.facebook.com/oauth/access_token?client_id=$app_id&client_secret=$app_secret&grant_type=fb_exchange_token&fb_exchange_token=".$shortLiveToken;
+		// $data = getPageData($url);
+
+		// $res = explode('&', $data);
+		// $arr = explode('=', $res[0]);
+		// $arr2 = explode('=', $res[1]);
+
+		// if( $arr[1] !== null && $arr[1] != "" ){
+		// 	update_user_access_token($arr[1]);
+		// 	return json_encode( array( 'status' => '200', "longLiveAccessToken" => $arr[1], "expiresIn" => (int)$arr2[1], "shortLiveAccessToken" => $shortLiveToken ) );
+
+		// }
+		
+		// return json_encode( array('status' => '500', 'longLiveAccessToken' => null, 'expiresIn' => null, 'msg' => 'Sorry, we can\'t generate a longlive access token right now. Please try again later.') );
+
+	}
+}
+
 if( !function_exists('searchImages') ){
 	function searchImages($q){
 		$q = str_replace('.', " ", str_replace("'", " ", $q) );
@@ -296,7 +323,7 @@ if( !function_exists('searchImages') ){
 
 if( !function_exists('deleteImage') ){
 	function deleteImage($filename){
-		if( unlink(WP_SM_ABS_PATH.'uploads/'.$filename) ){
+		if( unlink(WP_SM_UPLOADS_FOLDER_ABS_PATH . $filename) ){
 			return json_encode( array("status" => "success") );
 		}
 		return json_encode( array("status" => "failed", "msg" => "Sorry, we can't process your request right now. Please make sure to disable open_basedir in your php configuration file.") );
@@ -306,27 +333,39 @@ if( !function_exists('deleteImage') ){
 if( !function_exists('grabImageFromUrl') ){
 	function grabImageFromUrl($src){
 		$php_errormsg = error_get_last();
-		if( ini_get('allow_url_fopen') ) {
-		  	$image_data = getPageData($src);
-			$filename = get_current_user_id()."_".time().'.jpg';
-			if( @file_put_contents(WP_SM_ABS_PATH.'uploads/'.$filename, $image_data) ){
-				return json_encode( array("status" => "success", "filename" => $filename, "error" => $php_errormsg) );
-			}
+		
+		if( !is_connected() ){
 			return json_encode( array(
 				"status" => "failed", 
-				"msg" => "Sorry, we can't process your request right now. Please make sure to disable open_basedir in your php configuration file.",
-				"error" => $php_errormsg,
-				"target" => WP_SM_ABS_PATH.'uploads/'.$filename,
-				"image" => $image_data
-				)
-			);
-		}else{
-			return json_encode( array(
-				"status" => "failed", 
-				"msg" => "This plugin require allow_url_fopen to be enabled. Please enable it on your php configuration file.",
+				"msg" => "Please make sure you are connected to the internet.",
 				"error" => $php_errormsg
 			) );
 		}
+
+	  	$image_data = getPageData($src);
+
+	  	// let's get the image original extension
+	  	$ext = pathinfo($src, PATHINFO_EXTENSION);
+
+		$filename = get_current_user_id()."_".time().'.'.$ext;
+
+		$fp = fopen(WP_SM_UPLOADS_FOLDER_ABS_PATH . $filename,'w+');
+		fwrite($fp, $image_data);
+		fclose($fp); 
+
+		if( file_exists( WP_SM_UPLOADS_FOLDER_ABS_PATH . $filename ) ){
+			return json_encode( array("status" => "success", "filename" => $filename, "error" => $php_errormsg) );
+		}
+
+		return json_encode( array(
+			"status" => "failed", 
+			"msg" => "Sorry, we can't process your request right now. Please make sure to disable open_basedir in your php configuration file.",
+			"error" => $php_errormsg,
+			"target" => WP_SM_UPLOADS_FOLDER_ABS_PATH . $filename,
+			"image" => $image_data
+			)
+		);
+		
 		
 	}
 }

@@ -14,7 +14,7 @@
 					</div>
 					<div class="rd-gallery">
 					<?php 
-						$files = glob(WP_SM_UPLOADS_FOLDER_ABS_PATH . '*.{jpg,png}', GLOB_BRACE);
+						$files = glob(WP_SM_UPLOADS_FOLDER_ABS_PATH . '*.{jpg,jpeg,png,JPG,JPEG,PNG}', GLOB_BRACE);
 
 						if( count($files) < 1 ){
 							echo '<h4>No image available.</h4>';
@@ -46,23 +46,10 @@
 			</div>
 			<div class="col-md-6">
 				<div class="row">
-					<!-- <div class="col-md-8">
-						<input type="text" class="form-control" id="img_search" placeholder="Enter keyword" name="keyword" />
-					</div>
-					<div class="col-md-4">	
-						<div class="rd-icon-search rd-icon-lg">
-							<span>
-								<a href="javascript:void(0);" id="btn_img_search">Image Search</a>
-							</span>
-						</div>
-					</div> -->
-
 					<div class="col-md-12">
 						<div class="input-group">
-	                    	<!-- <input type="text" class="form-control"> -->
 							<input type="text" class="form-control" id="img_search" placeholder="Enter keyword" name="keyword" />
 							<span class="wpsm-addon input-group-addon no-border">
-	                          <!-- <input type="checkbox"> -->
 	                          	<div class="rd-icon-search rd-icon-lg">
 									<span>
 										<a href="javascript:void(0);" id="btn_img_search">Image Search</a>
@@ -77,7 +64,8 @@
 				</div>
 
 				<form id="form_upload_image" action="js/upload.php" method="post" enctype="multipart/form-data" class="form-inline" style="margin-bottom: 12px;">
-
+					<input type="hidden" name="action" value="WpSocialMageAjax" />
+					<input type="hidden" name="q" value="upload_image" />
 					<div class="row">
 						<div class="col-md-12" style="margin-bottom: 5px;">
 							<input type="hidden" name="user_id" value="<?php echo get_current_user_id(); ?>">

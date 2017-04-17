@@ -71,9 +71,9 @@ switch ($q) {
 				$_FILES['image']['name'] = $var[0].time().$var[1];
 			}
 
-			$target = WP_SM_UPLOADS_FOLDER_ABS_PATH . $_FILES['image']['name']);
+			$target = WP_SM_UPLOADS_FOLDER_ABS_PATH . $_FILES['image']['name'];
 
-		    if( move_uploaded_file($_FILES['image']['tmp_name'], $target ){
+		    if( move_uploaded_file($_FILES['image']['tmp_name'], $target) ){
 		    	$response = array(
 		    		'status' => 'success', 
 		    		'msg' => $_FILES['image']['name']." uploaded successfully.", 
@@ -95,4 +95,5 @@ switch ($q) {
 }
 
 echo trim($response);
+
 die;

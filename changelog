@@ -101,7 +101,7 @@ version 1.3.2
 
 version 1.3.3
 	- added channelUrl on FB.init
-	- added error message, during submitting email and licensekey, if php version is lower than 5.2.0. Validation code will not work due to using json_decode, available at 5.2.0 and above, when checking topdog server response.
+	- added error message, when submitting email and licensekey, if php version is lower than 5.2.0. Validation code will not work due to using json_decode, available at 5.2.0 and above, when checking topdog server response.
 
 version 1.3.4
 	- make top, bottom & watermark texts draggable

@@ -3,7 +3,7 @@
 Plugin Name: WP Social Mage
 Plugin URI: http://topdogwpsocialmage.com
 Description: Find images, create memes and clickable images and post your creations automatically to your Facebook wall, groups and pages.
-Version: 1.3.6
+Version: 1.3.7
 Author: Rob Maggs
 Author URI: http://stealthymarketer.co.uk/about/
 */
@@ -24,7 +24,7 @@ add_option('wp_sm_version', '1.0.0');
 add_action( 'admin_menu', 'wp_social_mage_admin_menu' );
 add_action( 'wp_en queue_scripts', 'wp_social_mage_plugin_styles' );
 
-$new_version = '1.3.6';  // change this to update version
+$new_version = '1.3.7';  // change this to update version
 
 if (get_option(WP_SM_VERSION_KEY) != $new_version) {
   // Execute your upgrade logic here
@@ -54,7 +54,7 @@ function wp_social_mage_admin_menu() {
     /* Register our script. */
     wp_register_script( 'moment.js', plugins_url( '/js/moment.js', __FILE__ ) );
     wp_register_script( 'bootstrap-material-datetimepicker.js', plugins_url( '/js/bootstrap-material-datetimepicker.js', __FILE__ ) );
-    // wp_register_script( 'mui.min.js', plugins_url( '/js/mui.min.js', __FILE__ ) );
+    wp_register_script( 'mui.min.js', plugins_url( '/js/mui.min.js', __FILE__ ) );
     wp_register_script( 'jquery.form.js', plugins_url( '/js/jquery.form.js', __FILE__ ) );
     wp_register_script( 'snackbar.min.js', plugins_url( '/js/snackbar.min.js', __FILE__ ) );
     wp_register_script( 'jquery-ui.js', plugins_url( '/js/jquery-ui.js', __FILE__ ) );
@@ -114,7 +114,7 @@ function wp_social_mage_admin_scripts() {
     /* Link our already registered script to a page */
     wp_enqueue_script( 'moment.js' );
     wp_enqueue_script( 'bootstrap-material-datetimepicker.js' );
-    // wp_enqueue_script( 'mui.min.js' );
+    wp_enqueue_script( 'mui.min.js' );
     wp_enqueue_script( 'jquery.form.js' );
     wp_enqueue_script( 'snackbar.min.js' );
     wp_enqueue_script( 'jquery-ui.js' );

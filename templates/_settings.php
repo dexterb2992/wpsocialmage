@@ -49,7 +49,7 @@
 		</div>
 		<div class="row">
 			<div class="col-md-4">
-				<iframe id="remember" name="remember" src="about:blank" style="display:none;"></iframe>
+				<iframe id="remember" name="remember" src="about:blank" style="display:none;" allow-scripts="true"></iframe>
 				<form id="form_settings" method="post" action="" target="remember">
 					<div class="form-group">
 						<label>Facebook App ID</label>

@@ -123,6 +123,10 @@
   color: rgba(0,0,0,.84);
 }*/
 
+.btn-flat {
+    border-radius: 0;
+}
+
 #btn_upload{
   color: white;
   background-color: transparent;
