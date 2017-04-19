@@ -218,7 +218,7 @@
                 if( response2.hasOwnProperty('data') ){
                     if(response2.data.length < 1){
                         show_results_for_where_to_post();
-                        get_albums(fbUserId);
+                        // get_albums(fbUserId);
                     }
                 }
 
@@ -227,30 +227,30 @@
                 }else{
                     console.log("An error has occured while getting groups.");
                     show_results_for_where_to_post();
-                    get_albums(fbUserId);
+                    // get_albums(fbUserId);
                 }
             });
         }
 
-        function get_albums(userId){
-            console.log("get_albums is called");
-            $.ajax({
-                url: fbHost+fbUserId+'/albums?fields=id,can_upload,name&access_token='+fbAccessToken,
-                type: 'get',
-                assync: false,
-            }).done(function (response){
-                console.log(response);
-                if( response.hasOwnProperty('data') ){
-                    if(response.data.length < 1){
-                        show_results_for_albums();
-                    }
-                }
+        // function get_albums(userId){
+        //     console.log("get_albums is called");
+        //     $.ajax({
+        //         url: fbHost+fbUserId+'/albums?fields=id,can_upload,name&access_token='+fbAccessToken,
+        //         type: 'get',
+        //         assync: false,
+        //     }).done(function (response){
+        //         console.log(response);
+        //         if( response.hasOwnProperty('data') ){
+        //             if(response.data.length < 1){
+        //                 show_results_for_albums();
+        //             }
+        //         }
 
-                if (response && !response.error) {
-                    get_graph_api_request_assync(response, "albums", show_results_for_albums);
-                }
-            });
-        }
+        //         if (response && !response.error) {
+        //             get_graph_api_request_assync(response, "albums", show_results_for_albums);
+        //         }
+        //     });
+        // }
 
         function show_results_for_where_to_post(){
             console.log("show_results_for_where_to_post is called");
@@ -333,167 +333,182 @@
         function refreshWhereToPost(userId){
                 get_pages(userId);  // after getting pages, this will automatically call the get_groups method
                                     // since they are on the same select
-                get_albums(userId);
+                // get_albums(userId);
         }
 
-        function postPhoto(albumId){
-            if( albumId !== 0 ){
+        // function postPhoto(albumId){
+        function postPhoto(){
+            // let's upload the image
 
-                // let's upload the image
+            // let's change html2canvas to rasterizeHTML for better text quality
+            var canvas = document.getElementById("image_preview"),
+                context = canvas.getContext('2d');
 
-                // let's change html2canvas to rasterizeHTML for better text quality
-                var canvas = document.getElementById("image_preview"),
-                    context = canvas.getContext('2d');
+            rasterizeHTML.drawHTML($(".image-holder").html()).then(function (renderResult) {
+                context.drawImage(renderResult.image, 10, 25);
 
-                rasterizeHTML.drawHTML($(".image-holder").html()).then(function (renderResult) {
-                    context.drawImage(renderResult.image, 10, 25);
+                var theCanvas = canvas;
 
-                    var theCanvas = canvas;
+                var imageData = canvas.toDataURL("image/png");
+                window.globalDataUrl = imageData;
 
-                    var imageData = canvas.toDataURL("image/png");
-                    window.globalDataUrl = imageData;
+                var blob = "";
+                try {
+                    blob = dataURItoBlob(imageData);
+                } catch (e) {
+                    console.log(e);
+                }
 
-                    var blob = "";
-                    try {
-                        blob = dataURItoBlob(imageData);
-                    } catch (e) {
-                        console.log(e);
-                    }
-                    var fd = new FormData();
-                    fd.append("access_token", fbAccessToken);
+                var fd = new FormData();
+                fd.append("access_token", fbAccessToken);
+                // fd.append("source", blob);
+
+                fd.append("message", $("#post_title").val());
+                fd.append("link", $("#target_url").val());
+
+                var graphUrlExt = "photos";
+
+                if( $.trim( $("#target_url").val() ) != "" ){
+                    graphUrlExt = "feed";
+                    fd.append("picture", window.uploadsUrl+$imageFilename);
+                    fd.append("source", window.uploadsUrl+$imageFilename);
+                    fd2.append("name", $("#post_title").val());
+                    fd2.append("caption", $("#post_description").val());
+                }else{
                     fd.append("source", blob);
-                    fd.append("message", $("#post_title").val());
-                    fd.append("link", $("#target_url").val());
-
-                    var graphUrlExt = "photos";
-
-                    if( $.trim( $("#target_url").val() ) != "" ){
-                        graphUrlExt = "feed";
-                        fd.append("picture", window.uploadsUrl+$imageFilename);
-                    }
+                }
 
 
-                    try {
-                        var btn = $("#post_to_fb");
+                try {
+                    var btn = $("#post_to_fb");
 
-                        btn.html("Please wait...").addClass("disabled").attr("disabled", "disabled");
+                    btn.html("Please wait...").addClass("disabled").attr("disabled", "disabled");
 
-                        $.each(whereToPost, function(i, row){
-                            var check_if_page = $.inArray(row, pages_array);
-                            // Make sure not to include page
-                            if( check_if_page < 0 ){
-                                console.log("row: "+row);
-                                if( row == "me" ){ // Wall
-                                    if( typeof(albumId) != 'undefined' && albumId != null  && albumId !== 0 ){
-                                        row = albumId;
-                                    }
-                                }
-                                
-                                var request = $.ajax({
-                                    assync: false,
-                                    url: fbHost+row+"/"+graphUrlExt,
-                                    type: "POST",
-                                    data: fd,
-                                    processData: false,
-                                    contentType: false,
-                                    cache: false,
-                                    beforeSend: function (){
-                                        console.log("posting to "+row+' feed...');
-                                    },
-                                    success: function (data){
-                                        console.log("response when target_url is not empty:");
-                                        console.log(data);
-                                    },
-                                    error: function (shr, status, data){
-                                        if( row == "me" ){
-                                            $.snackbar({content: "Failed when posting to wall. Please try again later. "+data+" status "+shr.status, timeout: 4000});
-                                        }else{
-                                            $.snackbar({content: "Failed when posting to group. "+data+" status "+shr.status, timeout: 4000});
-                                        }
-                                        console.log("Error when posting to "+row+" feed. "+data+" status "+shr.status);
-                                    }
-                                });
-                            }
-                        });
-                        
-                        FB.api(fbUserId+'/accounts', function(data){
-                            if( data.hasOwnProperty('data') ){
-                                window.pages_access_tokens = data.data;
-                            }
-                            
-                            console.log("window.pages_access_tokens: ");
-                            console.log(window.pages_access_tokens);
+                    $.each(whereToPost, function(i, row){
+                        var check_if_page = $.inArray(row, pages_array);
+                        // Make sure not to include page
+                        if( check_if_page < 0 ){
+                            console.log("row: "+row);
+                            // if( row == "me" ){ // Wall
+                            //     if( typeof(albumId) != 'undefined' && albumId != null  && albumId !== 0 ){
+                            //         row = albumId;
+                            //     }
+                            // }
+                            var postLocation = row == "me" ? "wall. " : "group. ";
 
-                            // Here we execute if user has a page id on the where_to_post field
-                            $.each(whereToPost, function (i, row){
-                              
-                                var check_if_page = $.inArray(row, pages_array);
+                            var request = $.ajax({
+                                assync: false,
+                                url: fbHost+row+"/"+graphUrlExt,
+                                type: "POST",
+                                data: fd,
+                                processData: false,
+                                contentType: false,
+                                cache: false,
+                                beforeSend: function (){
+                                    console.log("posting to "+row+' feed...');
+                                },
+                                success: function (data){
+                                    console.log("response when target_url is not empty:");
+                                    console.log(data);
 
-                                if( check_if_page !== -1 ){  // it means, the row is a page ID         
-                                    console.log("we're starting to upload image as Page Admin");
-                                    // let's upload the image directly to the page as admin
-                                    //FB.api(fbUserId+'/accounts', function(data){  // getting the page access token
-                                        console.log(data);  
-
-                                        // var page_access_token = data.data[0].access_token;
-                                        var page_access_token = "";
-                                        $.each(window.pages_access_tokens, function (i2, row2){
-                                            if( row == row2.id ){
-                                                page_access_token = row2.access_token;
-                                            }
-                                        });
-
-                                        //let's try to publish to page feed
-                                        var fd2 = new FormData();
-                                        fd2.append("access_token", page_access_token);
-                                        fd2.append("name", $("#post_title").val());
-                                        fd2.append("link", $("#target_url").val());
-                                        fd2.append("caption", $("#post_description").val());
-                                        fd2.append("message", $("#post_message").val());
-                                        fd2.append('picture', pageImgUploadedUrl);
-                                        url2 = fbHost+row+"/feed";
-
-                                        var page_success_flag = false;
-                                        $.ajax({
-                                            url: url2,
-                                            type: 'post',
-                                            data: fd2,
-                                            processData: false,
-                                            contentType: false,
-                                            cache: false,
-                                            beforeSend: function (){
-                                                btn.html("Posting...");
-                                                console.log("Posting new image to page feed...");
-                                            },
-                                            success: function (data){
-                                                console.log(data);
-                                                // alert("Posted to facebook page successfully.");
-                                                $.snackbar({ content: "Posted to facebook page successfully.", timeout: 4000});
-                                                page_success_flag = true;
-                                            },
-                                            error: function (shr, status, data) {
-                                                console.log("error " + data + " Status " + shr.status);
-                                                // alert("Failed to post on a facebook page. Please try again later.");
-                                                $.snackbar({ content: "Failed to post on a facebook page. Please try again later.", timeout: 4000});
-                                                btn.removeAttr("disabled").removeClass("disabled").html("POST");
-                                            },
-                                            complete: function () {
-                                                console.log("Posted to facebook page successfully.");
-                                                // alert("Posted to facebook successfully.");
-                                                btn.removeAttr("disabled").removeClass("disabled").html("POST");
-                                            }
-                                        });
-                                    //});
+                                    $.snackbar({content: "Successfully posted to your "+postLocation, timeout: 4000});
+                                },
+                                error: function (shr, status, data){
+                                    $.snackbar({content: "Failed when posting to "+postLocation+data+" status "+shr.status, timeout: 4000});
+                                    console.log("Error when posting to "+row+" feed. "+data+" status "+shr.status);
                                 }
                             });
+                        }
+                    });
+                    
+                    FB.api(fbUserId+'/accounts', function(data){
+                        if( data.hasOwnProperty('data') ){
+                            window.pages_access_tokens = data.data;
+                        }
+                        
+                        console.log("window.pages_access_tokens: ");
+                        console.log(window.pages_access_tokens);
 
+                        // Here we execute if user has a page id on the where_to_post field
+                        $.each(whereToPost, function (i, row){
+                          
+                            var check_if_page = $.inArray(row, pages_array);
+
+                            if( check_if_page !== -1 ){  // it means, the row is a page ID         
+                                console.log("we're starting to upload image as Page Admin");
+                                // let's upload the image directly to the page as admin
+                                //FB.api(fbUserId+'/accounts', function(data){  // getting the page access token
+                                    console.log(data);  
+
+                                    // var page_access_token = data.data[0].access_token;
+                                    var page_access_token = "";
+                                    $.each(window.pages_access_tokens, function (i2, row2){
+                                        if( row == row2.id ){
+                                            page_access_token = row2.access_token;
+                                        }
+                                    });
+
+                                    //let's try to publish to page feed
+                                    var fd2 = new FormData();
+                                    fd2.append("access_token", page_access_token);
+                                    fd2.append("message", $("#post_title").val());
+                                    fd2.append("link", $("#target_url").val());
+                                    // fd2.append("name", $("#post_title").val());
+                                    // fd2.append("link", $("#target_url").val());
+                                    // fd2.append("caption", $("#post_description").val());
+                                    // fd2.append("message", $("#post_message").val());
+                                    // fd2.append('picture', pageImgUploadedUrl);
+                                    // fd2.append('picture', window.uploadsUrl+window.$imageFilename);
+                                    // url2 = fbHost+row+"/feed";
+
+                                    var graphUrlExt = "photos";
+                                    if( $.trim( $("#target_url").val() ) != "" ){
+                                        graphUrlExt = "feed";
+                                        fd2.append("picture", window.uploadsUrl+$imageFilename);
+                                        fd2.append("source", window.uploadsUrl+$imageFilename);
+                                        fd2.append("name", $("#post_title").val());
+                                        fd2.append("caption", $("#post_description").val());
+                                    }else{
+                                        fd2.append("source", blob);
+                                    }
+
+                                    var page_success_flag = false;
+                                    $.ajax({
+                                        // url: url2,
+                                        url: fbHost+row+"/"+graphUrlExt,
+                                        type: 'post',
+                                        data: fd2,
+                                        processData: false,
+                                        contentType: false,
+                                        cache: false,
+                                        beforeSend: function (){
+                                            btn.html("Posting...");
+                                            console.log("Posting new image to page feed...");
+                                        },
+                                        success: function (data){
+                                            console.log(data);
+                                            $.snackbar({ content: "Posted to facebook page successfully.", timeout: 4000});
+                                            page_success_flag = true;
+                                        },
+                                        error: function (shr, status, data) {
+                                            console.log("error " + data + " Status " + shr.status);
+                                            $.snackbar({ content: "Failed to post on a facebook page. Please try again later.", timeout: 4000});
+                                            btn.removeAttr("disabled").removeClass("disabled").html("POST");
+                                        },
+                                        complete: function () {
+                                            btn.removeAttr("disabled").removeClass("disabled").html("POST");
+                                        }
+                                    });
+                                //});
+                            }
                         });
 
-                    } catch (e) {
-                        console.log(e);
-                    }
-                });    
-            }
+                    });
+
+                } catch (e) {
+                    console.log(e);
+                }
+            });
         }
 
         function getLongLiveFBToken(){
@@ -924,8 +939,11 @@
                         // Do all facebook stuffs here
 
                         whereToPost = $("#where_to_post").val();
+                        var optionsAlbum = $("input[name='optionsAlbum']:checked").val();
 
-                        if( $("input[name='optionsAlbum']:checked").val() == "create" ){
+                        postPhoto();
+
+                        /*if( optionsAlbum == "create" ){
                             // creates a new album
                             var albumName = $("#album_name").val();
                             FB.api('/me/albums', 'post', {
@@ -941,11 +959,13 @@
                                 
                                 refreshWhereToPost(fbUserId);
                             });
-                        }else{
+                        }else if( optionsAlbum == "choose" ){
                             // we'll use the existing selected album
                             albumId = $("select#album").val();
                             postPhoto(albumId);
-                        }
+                        }else{
+                            postPhoto();
+                        }*/
                         
                     } else {
                         console.log('User cancelled login or did not fully authorize.');
@@ -957,7 +977,7 @@
                 $.each(error_fields, function (i, row){
                     console.log(row);
                     $(row.field).addClass("dirty");
-                    $.snackbar({ content: row.error, timeout: 6000});
+                    $.snackbar({ content: row.error, timeout: 6000 });
                 });
             }
            
@@ -1084,16 +1104,16 @@
 
             }
 
-            if( $("#options_album_create").is(":checked") && $.trim( $("#album_name").val() ) === "" ){
+            // if( $("#options_album_create").is(":checked") && $.trim( $("#album_name").val() ) === "" ){
 
-                res = false;
-                error_fields.push({"field": "#album_name", "error": "Please provide an Album Name"});
+            //     res = false;
+            //     error_fields.push({"field": "#album_name", "error": "Please provide an Album Name"});
                 
 
-            }else if( $("#options_album_choose").is(":checked") && $("#album").val() === "" ){
-                res = false;
-                error_fields.push({"field": "#album", "error": "Please choose an existing album"});
-            }
+            // }else if( $("#options_album_choose").is(":checked") && $("#album").val() === "" ){
+            //     res = false;
+            //     error_fields.push({"field": "#album", "error": "Please choose an existing album"});
+            // }
 
             if( isSchedule && $("input#schedule").val() === "" ){
                 res = false;
@@ -1512,7 +1532,7 @@
         }
 
         $("#target_url").bind("change keyup", function (){
-            if( $(this).val() !== "" ){
+            if( $.trim( $(this).val() ) !== "" ){
                 $("#post_title").prev("label").html("Title");
                 $("#post_title").parent("div").fadeOut();
                 $("#post_message").parent("div").removeClass("hidden").fadeIn();

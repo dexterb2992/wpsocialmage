@@ -137,15 +137,11 @@
 				<input type="url" class="form-control" name="url" id="target_url" required>
 			</div>
 			<div class="form-group hidden">
-				<!-- <input type="text" class="form-control" name="message" id="post_message"> -->
 				<label class="form-floating-label">What's on your mind?</label>
-
 				<textarea class="form-control" name="message" id="post_message"></textarea>
 			</div>
 			<div class="form-group">
 				<label class="form-floating-label">What's on your mind?</label>
-
-				<!-- <input type="text" class="form-control" name="title" id="post_title" required> -->
 				<textarea class="form-control" name="title" id="post_title"></textarea>
 			</div>
 			<div class="form-group hidden">
@@ -155,7 +151,7 @@
 			</div>
 			
 			
-			<div class="form-group">
+			<!-- <div class="form-group">
 				<input type="radio" name="optionsAlbum" title="Where should we upload this photo?" id="options_album_create" value="create" checked>
 				<label for="options_album_create">
 					Create new album
@@ -172,18 +168,18 @@
 				<label for="options_album_none">
 					Post directly
 				</label>
-			</div>
+			</div> -->
 
-			<div class="form-group" id="div_create_new_album">
+			<!-- <div class="form-group" id="div_create_new_album">
 				<label class="form-floating-label">Album Name</label>
 
 				<input type="text" class="form-control" id="album_name" name="album_name" />
-			</div>
-			<div class="form-group invisible" style="display:none;" id="div_choose_existing_album" name="album"> 
+			</div> -->
+			<!-- <div class="form-group invisible" style="display:none;" id="div_choose_existing_album" name="album"> 
 				<label class="form-floating-label">Select Album</label>
 
 				<select class="form-control select not-empty select2" id="album" name="select_album" title="Select an album where do you want to upload"></select>
-			</div>
+			</div> -->
 
 			<div class="form-group">
 				<label class="form-floating-label" data-toggle="tooltip" data-original-title="Select where do you want us to post this status">Post to</label>
