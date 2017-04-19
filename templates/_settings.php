@@ -60,7 +60,7 @@
 						<input class="form-control" type="text" name="fb_app_secret" data-toggle="tooltip" data-original-title="Enter your App Secret" value="<?php echo WP_SM_FB_APP_SECRET;?>"/>
 					</div>
 					<div class="form-group">
-						<button class="btn-primary btn btn-flat" id="save_settings"><i class="fa fa-facebook-official"></i> Save & Connect to Facebook</button>
+						<button class="btn-primary btn btn-flat" id="wp_sm_save_settings"><i class="fa fa-facebook-official"></i> Save & Connect to Facebook</button>
 					</div>
 				</form>
 			</div>

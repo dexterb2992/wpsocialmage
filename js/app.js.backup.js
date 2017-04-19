@@ -2087,13 +2087,13 @@
 
 
         $("#form_settings").submit(function(e){
-        // $("#save_settings").click(function (e){
+        // $("#wp_sm_save_settings").click(function (e){
             if( formFbSettingHasError($(this)) ){
                 e.preventDefault();
                 return false;
             }else{
                 try{
-                    $("#save_settings").html("Please wait...");
+                    $("#wp_sm_save_settings").html("Please wait...");
                     var form = $("#form_settings");
                     // fbAppId = form.find('input[name="fb_app_id"]').val().replace(/[^0-9]/g,''); // ensure that it's only numbers
                     var newfbAppId = form.find('input[name="fb_app_id"]').val().replace(/[^0-9]/g,''); // ensure that it's only numbers
@@ -2155,34 +2155,34 @@
                                                 if( data.status_code == "200" ){
                                                     $("#timezone_setting").html($('#timezone_setting').val());
                                                     $.snackbar({ content: "Your Settings have been saved.", timeout: 4000});
-                                                    $("#save_settings").html("<i class='fa fa-facebook-official'></i> Save & Connect to Facebook");
+                                                    $("#wp_sm_save_settings").html("<i class='fa fa-facebook-official'></i> Save & Connect to Facebook");
                                                     $(".rd-icon-home span a").click();
                                                 }
                                             }).fail(function(data){
                                                 console.log(data);
-                                                $("#save_settings").html("<i class='fa fa-facebook-official'></i> Save & Connect to Facebook");
+                                                $("#wp_sm_save_settings").html("<i class='fa fa-facebook-official'></i> Save & Connect to Facebook");
                                             });
                                         }else{
                                             if( response.msg ){
                                                 $.snackbar({ content: response.msg, timeout: 4000 });
-                                                $("#save_settings").html("<i class='fa fa-facebook-official'></i> Save & Connect to Facebook");
+                                                $("#wp_sm_save_settings").html("<i class='fa fa-facebook-official'></i> Save & Connect to Facebook");
                                             }
                                             
                                         }
                                     }).fail(function(data){
                                         console.log(data);
                                         console.log('Error generating long live auth token');
-                                        $("#save_settings").html("<i class='fa fa-facebook-official'></i> Save & Connect to Facebook");
+                                        $("#wp_sm_save_settings").html("<i class='fa fa-facebook-official'></i> Save & Connect to Facebook");
                                     });
 
                                 } else {
                                     console.log('User cancelled login or did not fully authorize.'); 
-                                    $("#save_settings").html("<i class='fa fa-facebook-official'></i> Save & Connect to Facebook");
+                                    $("#wp_sm_save_settings").html("<i class='fa fa-facebook-official'></i> Save & Connect to Facebook");
                                 }
                             }, {scope: fbScope});
                         }catch(Exception){
                             console.log(Exception);
-                            $("#save_settings").html("<i class='fa fa-facebook-official'></i> Save & Connect to Facebook");
+                            $("#wp_sm_save_settings").html("<i class='fa fa-facebook-official'></i> Save & Connect to Facebook");
                         }
                     });
                                         
@@ -2190,7 +2190,7 @@
                     
                 }catch(ErrorException){
                     console.log(ErrorException);
-                    $("#save_settings").html("<i class='fa fa-facebook-official'></i> Save & Connect to Facebook");
+                    $("#wp_sm_save_settings").html("<i class='fa fa-facebook-official'></i> Save & Connect to Facebook");
                 }
             }
         });

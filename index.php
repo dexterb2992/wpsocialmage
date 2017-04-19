@@ -238,6 +238,8 @@ function wp_social_mage_create_tables() {
 
 function wp_social_mage_uninstall(){
   require_once( ABSPATH . '/wp-config.php' );
+  global $wpdb;
+  $wpdb->query( "DROP TABLE IF EXISTS $wpdb->wp_social_mage_settings" );
 
   delete_option('wp_sm_email');
   delete_option('wp_sm_lkey');

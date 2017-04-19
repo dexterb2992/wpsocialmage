@@ -11,6 +11,7 @@
 	window.fbAppId = "<?php echo WP_SM_FB_APP_ID; ?>";
 	window.fbLimit = 100;
 	window.fbHost = "https://graph.facebook.com/";
+	window.whiteLabelUrl = 'http://topdogimsoftware.com/whitelabel-platform/';
 	var currentTimezone = '<?php echo WP_SM_CURRENT_TIMEZONE; ?>';
 	var $imageFilename = "<?php echo isset($_GET['image']) ? $_GET['image'] : ''; ?>";
 </script>

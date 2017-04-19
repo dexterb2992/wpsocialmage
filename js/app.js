@@ -184,7 +184,7 @@
             console.log("get_pages is called");
 
             $.ajax({
-                url: "https://graph.facebook.com/"+fbUserId+"/accounts?fields=id,name&access_token="+fbAccessToken,
+                url: fbHost+fbUserId+"/accounts?fields=id,name&access_token="+fbAccessToken,
                 type: 'get',
                 assync: false
             }).done(function (response1){
@@ -207,7 +207,7 @@
             console.log("get_groups is called");
 
             $.ajax({
-                url: "https://graph.facebook.com/"+fbUserId+"/groups?fields=id,name,administrator&access_token="+fbAccessToken,
+                url: fbHost+fbUserId+"/groups?fields=id,name,administrator&access_token="+fbAccessToken,
                 type: 'get',
                 assync: false
             }).done(function (response2){
@@ -232,7 +232,7 @@
         function get_albums(userId){
             console.log("get_albums is called");
             $.ajax({
-                url: 'https://graph.facebook.com/'+fbUserId+'/albums?fields=id,can_upload,name&access_token='+fbAccessToken,
+                url: fbHost+fbUserId+'/albums?fields=id,can_upload,name&access_token='+fbAccessToken,
                 type: 'get',
                 assync: false,
             }).done(function (response){
@@ -388,7 +388,7 @@
                                 
                                 var request = $.ajax({
                                     assync: false,
-                                    url: "https://graph.facebook.com/"+row+"/"+graphUrlExt,
+                                    url: fbHost+row+"/"+graphUrlExt,
                                     type: "POST",
                                     data: fd,
                                     processData: false,
@@ -440,139 +440,42 @@
                                             }
                                         });
 
-                                        console.log("pageID: "+row+"\n access_token: \n"+page_access_token);
-                                        var fd = new FormData();
-                                        var url = "";
-                                        
-                                        fd.append("source", blob);
-                                        fd.append("message", $("#post_title").val());
-                                        url = "https://graph.facebook.com/"+row+"/photos?access_token="+page_access_token;
-                                            
+                                        //let's try to publish to page feed
+                                        var fd2 = new FormData();
+                                        fd2.append("access_token", page_access_token);
+                                        fd2.append("name", $("#post_title").val());
+                                        fd2.append("link", $("#target_url").val());
+                                        fd2.append("caption", $("#post_description").val());
+                                        fd2.append("message", $("#post_message").val());
+                                        fd2.append('picture', pageImgUploadedUrl);
+                                        url2 = fbHost+row+"/feed";
+
+                                        var page_success_flag = false;
                                         $.ajax({
-                                            url: url,
-                                            type: "POST",
-                                            data: fd,
+                                            url: url2,
+                                            type: 'post',
+                                            data: fd2,
                                             processData: false,
                                             contentType: false,
                                             cache: false,
-                                            assync: false,
-                                            beforeSend : function (){
-                                                console.log("uploading image to page photos...");
+                                            beforeSend: function (){
+                                                btn.html("Posting...");
+                                                console.log("Posting new image to page feed...");
                                             },
-                                            success: function (response) {
-                                                console.log(response);
-                                                var pageImgUploadedId = response.id;
-                                                var pageImgUploadedUrl = "";
-
-                                                if( $.trim( $("#target_url").val() ) != "" ){
-                                                
-                                                    // getting the url of newly uploaded picture
-                                                    FB.api(row+"/picture?id="+pageImgUploadedId, function(response1){
-                                                        console.log("getting the url of newly uploaded picture..");
-                                                        console.log(response1);
-                                                        if( data.hasOwnProperty('error') ){
-                                                            console.log("ERROR while fetching url of newly uploaded photo on page.");
-                                                            $.snackbar({ content: "ERROR while fetching url of newly uploaded photo on page.", timeout: 4000});
-                                                        }else{
-                                                            pageImgUploadedUrl= response1.data.url;
-                                                            console.log('page image uploaded url: '+pageImgUploadedUrl);
-
-                                                            //let's try to publish to page feed
-                                                            var fd2 = new FormData();
-                                                            fd2.append("access_token", page_access_token);
-                                                            fd2.append("name", $("#post_title").val());
-                                                            fd2.append("link", $("#target_url").val());
-                                                            fd2.append("caption", $("#post_description").val());
-                                                            fd2.append("message", $("#post_message").val());
-                                                            fd2.append('picture', pageImgUploadedUrl);
-                                                            url2 = "https://graph.facebook.com/"+row+"/feed";
-
-                                                            var page_success_flag = false;
-                                                            $.ajax({
-                                                                url: url2,
-                                                                type: 'post',
-                                                                data: fd2,
-                                                                processData: false,
-                                                                contentType: false,
-                                                                cache: false,
-                                                                beforeSend: function (){
-                                                                    btn.html("Posting...");
-                                                                    console.log("Posting new image to page feed...");
-                                                                },
-                                                                success: function (data){
-                                                                    console.log(data);
-                                                                    // alert("Posted to facebook page successfully.");
-                                                                    $.snackbar({ content: "Posted to facebook page successfully.", timeout: 4000});
-                                                                    page_success_flag = true;
-                                                                    // if success, let's delete the photo post to hide it on the timeline
-                                                                    // $.ajax({
-                                                                    //     url: "https://graph.facebook.com/"+pageImgUploadedId+"?method=DELETE&access_token="+page_access_token,
-                                                                    //     type: "post",
-                                                                    //     processData: false,
-                                                                    //     contentType: false,
-                                                                    //     cache: false,
-                                                                    //     beforeSend: function (){
-                                                                    //         console.log("deleting image now...");
-                                                                    //     },
-                                                                    //     success: function (data){
-                                                                    //         console.log(data);
-                                                                    //     },
-                                                                    //     error: function (shr, status, data){
-                                                                    //         console.log("error " + data + " Status " + shr.status);
-                                                                    //         btn.removeAttr("disabled").removeClass("disabled").html("POST");
-                                                                    //     }
-                                                                    // });
-                                                                },
-                                                                error: function (shr, status, data) {
-                                                                    console.log("error " + data + " Status " + shr.status);
-                                                                    // alert("Failed to post on a facebook page. Please try again later.");
-                                                                    $.snackbar({ content: "Failed to post on a facebook page. Please try again later.", timeout: 4000});
-                                                                    btn.removeAttr("disabled").removeClass("disabled").html("POST");
-                                                                },
-                                                                complete: function () {
-                                                                    console.log("Posted to facebook page successfully.");
-                                                                    // alert("Posted to facebook successfully.");
-                                                                    btn.removeAttr("disabled").removeClass("disabled").html("POST");
-                                                                    
-                                                                    // if( page_success_flag === true ){
-                                                                        // if success, let's delete the photo post to hide it on the timeline
-                                                                        // $.ajax({
-                                                                        //     url: "https://graph.facebook.com/"+pageImgUploadedId+"?method=DELETE&access_token="+page_access_token,
-                                                                        //     type: "post",
-                                                                        //     processData: false,
-                                                                        //     contentType: false,
-                                                                        //     cache: false,
-                                                                        //     beforeSend: function (){
-                                                                        //         console.log("deleting image now...");
-                                                                        //     },
-                                                                        //     success: function (data){
-                                                                        //         console.log(data);
-                                                                        //     },
-                                                                        //     error: function (shr, status, data){
-                                                                        //         console.log("error " + data + " Status " + shr.status);
-                                                                        //         btn.removeAttr("disabled").removeClass("disabled").html("POST");
-                                                                        //     },
-                                                                        //     complete: function (){
-                                                                        //         // reset the success flag
-                                                                        //         // page_success_flag = false;
-                                                                        //     }
-                                                                        // });
-                                                                    // }
-
-                                                                }
-                                                            });
-                                                        }
-                                                    });
-                                                }
+                                            success: function (data){
+                                                console.log(data);
+                                                // alert("Posted to facebook page successfully.");
+                                                $.snackbar({ content: "Posted to facebook page successfully.", timeout: 4000});
+                                                page_success_flag = true;
                                             },
                                             error: function (shr, status, data) {
                                                 console.log("error " + data + " Status " + shr.status);
-                                                // alert("Failed to post on facebook. Please try again later.");
+                                                // alert("Failed to post on a facebook page. Please try again later.");
                                                 $.snackbar({ content: "Failed to post on a facebook page. Please try again later.", timeout: 4000});
                                                 btn.removeAttr("disabled").removeClass("disabled").html("POST");
                                             },
                                             complete: function () {
-                                                console.log("Posted to facebook");
+                                                console.log("Posted to facebook page successfully.");
                                                 // alert("Posted to facebook successfully.");
                                                 btn.removeAttr("disabled").removeClass("disabled").html("POST");
                                             }
@@ -1931,13 +1834,12 @@
 
 
         $("#form_settings").submit(function(e){
-        // $("#save_settings").click(function (e){
             if( formFbSettingHasError($(this)) ){
                 e.preventDefault();
                 return false;
             }else{
                 try{
-                    $("#save_settings").html("Please wait...");
+                    $("#wp_sm_save_settings").html("Please wait...");
                     var form = $("#form_settings");
                     // fbAppId = form.find('input[name="fb_app_id"]').val().replace(/[^0-9]/g,''); // ensure that it's only numbers
                     var newfbAppId = form.find('input[name="fb_app_id"]').val().replace(/[^0-9]/g,''); // ensure that it's only numbers
@@ -1999,34 +1901,34 @@
                                                 if( data.status_code == "200" ){
                                                     $("#timezone_setting").html($('#timezone_setting').val());
                                                     $.snackbar({ content: "Your Settings have been saved.", timeout: 4000});
-                                                    $("#save_settings").html("<i class='fa fa-facebook-official'></i> Save & Connect to Facebook");
+                                                    $("#wp_sm_save_settings").html("<i class='fa fa-facebook-official'></i> Save & Connect to Facebook");
                                                     $(".rd-icon-home span a").click();
                                                 }
                                             }).fail(function(data){
                                                 console.log(data);
-                                                $("#save_settings").html("<i class='fa fa-facebook-official'></i> Save & Connect to Facebook");
+                                                $("#wp_sm_save_settings").html("<i class='fa fa-facebook-official'></i> Save & Connect to Facebook");
                                             });
                                         }else{
                                             if( response.msg ){
                                                 $.snackbar({ content: response.msg, timeout: 4000 });
-                                                $("#save_settings").html("<i class='fa fa-facebook-official'></i> Save & Connect to Facebook");
+                                                $("#wp_sm_save_settings").html("<i class='fa fa-facebook-official'></i> Save & Connect to Facebook");
                                             }
                                             
                                         }
                                     }).fail(function(data){
                                         console.log(data);
                                         console.log('Error generating long live auth token');
-                                        $("#save_settings").html("<i class='fa fa-facebook-official'></i> Save & Connect to Facebook");
+                                        $("#wp_sm_save_settings").html("<i class='fa fa-facebook-official'></i> Save & Connect to Facebook");
                                     });
 
                                 } else {
                                     console.log('User cancelled login or did not fully authorize.'); 
-                                    $("#save_settings").html("<i class='fa fa-facebook-official'></i> Save & Connect to Facebook");
+                                    $("#wp_sm_save_settings").html("<i class='fa fa-facebook-official'></i> Save & Connect to Facebook");
                                 }
                             }, {scope: fbScope});
                         }catch(Exception){
                             console.log(Exception);
-                            $("#save_settings").html("<i class='fa fa-facebook-official'></i> Save & Connect to Facebook");
+                            $("#wp_sm_save_settings").html("<i class='fa fa-facebook-official'></i> Save & Connect to Facebook");
                         }
                     });
                                         
@@ -2034,7 +1936,7 @@
                     
                 }catch(ErrorException){
                     console.log(ErrorException);
-                    $("#save_settings").html("<i class='fa fa-facebook-official'></i> Save & Connect to Facebook");
+                    $("#wp_sm_save_settings").html("<i class='fa fa-facebook-official'></i> Save & Connect to Facebook");
                 }
             }
         });
@@ -2054,7 +1956,7 @@
             }).done(function (data){
                 console.log(data);
                 if( data.type == "standard_wl" || data.type == "pro_wl" ){ 
-                    window.location = 'http://topdogimsoftware.com/whitelabel-platform';
+                    window.location = window.whiteLabelUrl;
                 }else{
                     activateModal('wl_upgrade');
                 }
