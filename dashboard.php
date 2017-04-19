@@ -40,6 +40,7 @@
 	}else { 
 
 		if( WP_SM_FB_APP_ID != "" && isset( $_GET['action'] ) && $_GET['action'] == "add_filters" ){
+			include "templates/_header.php";
 			include "templates/image-filters.php";
 
 		}else if( isset( $_GET['action'] ) && $_GET['action'] == "get-support" ){
