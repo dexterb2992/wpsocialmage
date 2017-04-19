@@ -73,8 +73,8 @@
 						<div class="col-md-5">
 							<div class="form-group">
 								<select class="form-control select" id="image_size" data-source="sidebar">
-									<option value="500x500" data-id="1" title="Meme Size (500 x 500)" selected>Meme</option>
-									<option value="487x255" data-id="2" title="Clickable Size (487 x 255)">Clickable</option>
+									<option value="500x500" data-id="1" title="Meme Size (500 x 500)" selected>Meme (500 x 500)</option>
+									<option value="487x255" data-id="2" title="Clickable Size (487 x 255)">Clickable (487 x 255)</option>
 								</select>
 							</div>
 						</div>
@@ -83,11 +83,9 @@
 						</div>
 					</div>
 					<div class="row">
-						<div class="col-md-2"></div>
-						<div class="com-md-8">
-							<small><b>Note: You can't drag the background if the original image size is 487x255</b></small>
+						<div class="com-md-12">
+							<small class="pull-right"><b>Note: You can't drag the background if the original image size is 487x255</b></small>
 						</div>
-						<div class="col-md-2"></div>
 					</div>
 				</div>
 			</div>

@@ -2,7 +2,6 @@
     jQuery(document).ready(function(){
 
         var gblFileName = "", timezone = "";
-        // var fbUserId = "", fbAuthResponse = false, fbAccessToken = "";
         window.fbUserId = "", window.fbAuthResponse = false, window.fbAccessToken = "";
 
         var fbScope = 'email,user_about_me,publish_actions,user_posts,user_status,manage_pages,publish_pages,user_photos,user_managed_groups';
@@ -24,13 +23,17 @@
         // note: error_fields structure is 'field' => html element(#el or .el tag), 'error' => the error message
         var error_fields = [];
 
+        function fbInit(appId){
+            FB.init({ appId: appId, status: true, cookie: true, xfbml: true, oauth: true, channelUrl: channelUrl });
+
+            fbApiInit = true;
+            checkUserFbStatus();
+        }
+
     /* FB init */
         try{
             if( fbAppId !== "" ){
-                FB.init({ appId: fbAppId, status: true, cookie: true, xfbml: true, oauth: true, channelUrl: channelUrl });
-
-                fbApiInit = true;
-                checkUserFbStatus();
+                fbInit(fbAppId);
             }
         }catch(Exception){
             console.log(Exception);
@@ -1844,7 +1847,7 @@
                     // fbAppId = form.find('input[name="fb_app_id"]').val().replace(/[^0-9]/g,''); // ensure that it's only numbers
                     var newfbAppId = form.find('input[name="fb_app_id"]').val().replace(/[^0-9]/g,''); // ensure that it's only numbers
                     
-                    FB.init({ appId: newfbAppId, status: true, cookie: true, xfbml: true, oauth: true, channelUrl: channelUrl});
+                    fbInit(newfbAppId);
 
                     window.fbApiInit = true; //init flag
                     

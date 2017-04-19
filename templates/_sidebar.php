@@ -5,8 +5,8 @@
 				<div class="form-group">
 					<label class="form-floating-label">Image Size</label>
 					<select class="form-control select" id="image_size" data-source="sidebar">
-						<option value="500x500" data-id="1" title="Meme Size (500 x 500)" selected>Meme</option>
-						<option value="518x270" data-id="2" title="Clickable Size (487 x 255)">Clickable</option>
+						<option value="500x500" data-id="1" title="Meme Size (500 x 500)" selected>Meme (500 x 500)</option>
+						<option value="518x270" data-id="2" title="Clickable Size (487 x 255)">Clickable (487 x 255)</option>
 					</select>
 				</div>
 			</div>
