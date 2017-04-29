@@ -114,3 +114,11 @@ version 1.3.5
 version 1.3.7
 	- replaced default crawling method file_get_contents with curl > functions.php
 	- renamed #save_settings to #wp_sm_save_settings
+	- Removed album options and modified some lines of code on rasterizeHTML.allinone.js
+	- fix bug on image filters page
+	- added more details on image size options
+	- placed graph urls inside a variable
+	- fix duplicate posts on user feed
+	- fix upload paths
+	- updated the look and feel
+	- force to delete old file when there are some changes on the image (functions.php:205-206)

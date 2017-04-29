@@ -188,32 +188,51 @@ if( !function_exists('saveCanvas') ){
 		if( isset($_INPUT['data_action']) && $_INPUT['data_action'] == "save" ){
 			if( isset($_INPUT['filename']) ){
 				$filename = pathinfo($_INPUT['filename'], PATHINFO_BASENAME);
+				// $file_path = WP_SM_UPLOADS_FOLDER_ABS_PATH . $filename;
+				
+				// if( file_exists($file_path) ){
+				// 	unlink($file_path);
+				// }
 			}else{
 				$filename = get_current_user_id()."_".time().'.png';
 			}
+			/*}else{
+				$filename = get_current_user_id()."_".time().'.png';
+			}*/
 			
-			$file_path = WP_SM_UPLOADS_FOLDER_ABS_PATH . $filename;
+			// $file_path = WP_SM_UPLOADS_FOLDER_ABS_PATH . $filename;
 		}else{
-			$file_path = WP_SM_UPLOADS_FOLDER_ABS_PATH . $_INPUT['filename'];
-			if( file_exists($file_path) ){
-				unlink($file_path);
-			}
-			$filename = $_INPUT['filename'];
+			
+			// if( file_exists(WP_SM_UPLOADS_FOLDER_ABS_PATH . $_INPUT['filename']) ){
+			// 	unlink($file_path);
+			// }
+
+			$filename = get_current_user_id()."_".time().'.png';
+			// $file_path = WP_SM_UPLOADS_FOLDER_ABS_PATH . $filename;
+
+			// $filename = $_INPUT['filename'];
+			// $file_path = WP_SM_UPLOADS_FOLDER_ABS_PATH . $filename;
 		}
 
+		$file_path = WP_SM_UPLOADS_FOLDER_ABS_PATH . $filename;
+
+		if( file_exists($file_path) ){
+			unlink($file_path);
+		}
 		
 		$img = str_replace('data:image/png;base64,', '', $img);
 		$img = str_replace(' ', '+', $img);
 		$fileData = base64_decode($img);
 		//saving
 		
-		$fp = fopen($file_path,'w+');
+		$fp = fopen($file_path,'wa+');
 		fwrite($fp, $fileData);
 		fclose($fp); 
 
 		if( file_exists($file_path) ){
 			return json_encode( array( 'status' => 'success', 'user_id' => get_current_user_id(), 'filename' => $filename ) );
 		}
+		
 		$php_errormsg = error_get_last();
 
 		return json_encode( array( 
@@ -330,6 +349,23 @@ if( !function_exists('deleteImage') ){
 	}
 }
 
+if( !function_exists('grabImage') ){
+	function grabImage($url,$saveto){
+	    $ch = curl_init ($url);
+	    curl_setopt($ch, CURLOPT_HEADER, 0);
+	    curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+	    curl_setopt($ch, CURLOPT_BINARYTRANSFER,1);
+	    $raw=curl_exec($ch);
+	    curl_close ($ch);
+	    if(file_exists($saveto)){
+	        unlink($saveto);
+	    }
+	    $fp = fopen($saveto,'x');
+	    fwrite($fp, $raw);
+	    fclose($fp);
+	}
+}
+
 if( !function_exists('grabImageFromUrl') ){
 	function grabImageFromUrl($src){
 		$php_errormsg = error_get_last();
@@ -342,16 +378,18 @@ if( !function_exists('grabImageFromUrl') ){
 			) );
 		}
 
-	  	$image_data = getPageData($src);
+	  	// $image_data = getPageData($src);
 
 	  	// let's get the image original extension
 	  	$ext = pathinfo($src, PATHINFO_EXTENSION);
 
-		$filename = get_current_user_id()."_".time().'.'.$ext;
+		$filename = trim( get_current_user_id()."_".time().'.'.$ext );
 
-		$fp = fopen(WP_SM_UPLOADS_FOLDER_ABS_PATH . $filename,'w+');
-		fwrite($fp, $image_data);
-		fclose($fp); 
+		// $fp = fopen(WP_SM_UPLOADS_FOLDER_ABS_PATH . $filename,'x');
+		// fwrite($fp, $image_data);
+		// fclose($fp); 
+
+		grabImage($src, WP_SM_UPLOADS_FOLDER_ABS_PATH . $filename);
 
 		if( file_exists( WP_SM_UPLOADS_FOLDER_ABS_PATH . $filename ) ){
 			return json_encode( array("status" => "success", "filename" => $filename, "error" => $php_errormsg) );
@@ -517,6 +555,3 @@ if( !function_exists('wp_smage_get_plugin_info') ){
 
 
 ?>
-
-
-

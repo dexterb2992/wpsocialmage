@@ -136,10 +136,10 @@
 
 				<input type="url" class="form-control" name="url" id="target_url" required>
 			</div>
-			<div class="form-group hidden">
+			<!-- <div class="form-group">
 				<label class="form-floating-label">What's on your mind?</label>
 				<textarea class="form-control" name="message" id="post_message"></textarea>
-			</div>
+			</div> -->
 			<div class="form-group">
 				<label class="form-floating-label">What's on your mind?</label>
 				<textarea class="form-control" name="title" id="post_title"></textarea>

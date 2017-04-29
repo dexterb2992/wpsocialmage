@@ -13,7 +13,7 @@
 	window.fbHost = "https://graph.facebook.com/";
 	window.whiteLabelUrl = 'http://topdogimsoftware.com/whitelabel-platform/';
 	var currentTimezone = '<?php echo WP_SM_CURRENT_TIMEZONE; ?>';
-	var $imageFilename = "<?php echo isset($_GET['image']) ? $_GET['image'] : ''; ?>";
+	window.$imageFilename = "<?php echo isset($_GET['image']) ? $_GET['image'] : ''; ?>";
 </script>
 
 

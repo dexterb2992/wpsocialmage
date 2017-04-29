@@ -331,13 +331,12 @@
         }
 
         function refreshWhereToPost(userId){
-                get_pages(userId);  // after getting pages, this will automatically call the get_groups method
+            get_pages(userId);  // after getting pages, this will automatically call the get_groups method
                                     // since they are on the same select
-                // get_albums(userId);
         }
 
         // function postPhoto(albumId){
-        function postPhoto(){
+        function postPhoto(whereToPost){
             // let's upload the image
 
             // let's change html2canvas to rasterizeHTML for better text quality
@@ -361,7 +360,6 @@
 
                 var fd = new FormData();
                 fd.append("access_token", fbAccessToken);
-                // fd.append("source", blob);
 
                 fd.append("message", $("#post_title").val());
                 fd.append("link", $("#target_url").val());
@@ -372,8 +370,8 @@
                     graphUrlExt = "feed";
                     fd.append("picture", window.uploadsUrl+$imageFilename);
                     fd.append("source", window.uploadsUrl+$imageFilename);
-                    fd2.append("name", $("#post_title").val());
-                    fd2.append("caption", $("#post_description").val());
+                    fd.append("name", $("#post_title").val());
+                    fd.append("caption", $("#post_description").val());
                 }else{
                     fd.append("source", blob);
                 }
@@ -389,11 +387,7 @@
                         // Make sure not to include page
                         if( check_if_page < 0 ){
                             console.log("row: "+row);
-                            // if( row == "me" ){ // Wall
-                            //     if( typeof(albumId) != 'undefined' && albumId != null  && albumId !== 0 ){
-                            //         row = albumId;
-                            //     }
-                            // }
+
                             var postLocation = row == "me" ? "wall. " : "group. ";
 
                             var request = $.ajax({
@@ -421,6 +415,7 @@
                         }
                     });
                     
+                    // Pages
                     FB.api(fbUserId+'/accounts', function(data){
                         if( data.hasOwnProperty('data') ){
                             window.pages_access_tokens = data.data;
@@ -453,13 +448,6 @@
                                     fd2.append("access_token", page_access_token);
                                     fd2.append("message", $("#post_title").val());
                                     fd2.append("link", $("#target_url").val());
-                                    // fd2.append("name", $("#post_title").val());
-                                    // fd2.append("link", $("#target_url").val());
-                                    // fd2.append("caption", $("#post_description").val());
-                                    // fd2.append("message", $("#post_message").val());
-                                    // fd2.append('picture', pageImgUploadedUrl);
-                                    // fd2.append('picture', window.uploadsUrl+window.$imageFilename);
-                                    // url2 = fbHost+row+"/feed";
 
                                     var graphUrlExt = "photos";
                                     if( $.trim( $("#target_url").val() ) != "" ){
@@ -564,21 +552,30 @@
 
         }
 
-        function saveImageUpdates(){
+        /**
+         * define whereToPost if after saving the image the app needs to post to fb
+         * by default, whereToPost is null
+        */
+        function saveImageUpdates(whereToPost){
             var $this = $("#update_image"), action = $this.data("action"), filename = $("#image_preview").data("filename");
 
             $this.html("Saving...");
+            var current_height = $("#image_preview").height(),
+                current_width = $("#image_preview").width();
 
-            if( getUrlParameter('action') == 'add_filters' && ($from_php_width > 550 && $from_php_height > 255) ){
+            if( getUrlParameter('action') == 'add_filters' && (current_height > 500 || current_width > 500 ||
+                current_height < 487  || current_width < 255 ) ){
                 window.hasImageEffects = true;
             }
-
+            // $("#image_preview").width()
             console.log("hasImageEffects: "+window.hasImageEffects);
             
             // if action is 'save', then we'll check if the image don't have text so we don't need to re-render it, same
             // goes if the image is already on 487x255 or 500x500, we should not render the image
             
-            if( window.hasImageEffects === false && action == 'update' && $from_php_width < 550){
+            // if( window.hasImageEffects === false && action == 'update' && $from_php_width < 550){
+            if( window.hasImageEffects === false && action == 'update' &&
+                 (current_width == 500 && current_width == 500) || (current_width == 487 && current_height == 255)){
                 $this.html('&#10003; Redirecting...please wait.');
                 // save the image without re-rendering
                 window.location = '?page=wp-social-mage-dashboard&image='+filename;
@@ -592,7 +589,7 @@
                         var dataURL = canvas.toDataURL();
 
                         $this.attr("disabled", "disabled").addClass("disabled");
-                        ajax_save_image_updates(dataURL, filename, action, $this);
+                        ajax_save_image_updates(dataURL, filename, action, $this, whereToPost);
                     }
                 });
 
@@ -607,14 +604,14 @@
                         context.drawImage(renderResult.image, 10, 25);
 
                         dataURL = canvas.toDataURL();
-                        ajax_save_image_updates(dataURL, filename, action, $this);
+                        ajax_save_image_updates(dataURL, filename, action, $this, whereToPost);
                     });
 
                 }else{
                     html2canvas($(".image-holder"), {
                         onrendered: function(canvas) {
                             dataURL = canvas.toDataURL();
-                            ajax_save_image_updates(dataURL, filename, action, $this);
+                            ajax_save_image_updates(dataURL, filename, action, $this, whereToPost);
                         }
                     });
                 }
@@ -623,8 +620,9 @@
 
         }
 
-        // note: $this is the button
-        function ajax_save_image_updates(dataURL, filename, action, $this){
+        // Heads Up!: $this is the button
+        // if whereToPost is defined, we will proceed to postPhoto
+        function ajax_save_image_updates(dataURL, filename, action, $this, whereToPost){
             $this.attr("disabled", "disabled").addClass("disabled");
                     
             $.ajax({
@@ -640,39 +638,43 @@
                     q : "save_canvas",
                     filename : filename
                 },
-            }).done(function(o) {
+                success: function (o){
+                    console.log(o);
+                    (function (el) {
+                        setTimeout(function () {
+                            $this.removeAttr("disabled").removeClass("disabled");
+                            $this.html("Please wait...");
+                            if( o.status == "success" && action == "update" ){
+                                // window.location = '?page=wp-social-mage-dashboard&image='+filename;
+                                var a = document.createElement('a');
+                                a.href = '?page=wp-social-mage-dashboard&image='+o.filename;
+                                
+                                // click event for firefox
+                                var clickEvent = new MouseEvent("click", {
+                                    "view": window,
+                                    "bubbles": true,
+                                    "cancelable": false
+                                });
 
-                (function (el) {
-                    setTimeout(function () {
-                        $this.removeAttr("disabled").removeClass("disabled");
-                        $this.html("Please wait...");
-                        if( o.status == "success" && action == "update" ){
-                            // window.location = '?page=wp-social-mage-dashboard&image='+filename;
-                            var a = document.createElement('a');
-                            a.href = '?page=wp-social-mage-dashboard&image='+filename;
-                            
-                            // click event for firefox
-                            var clickEvent = new MouseEvent("click", {
-                                "view": window,
-                                "bubbles": true,
-                                "cancelable": false
-                            });
+                                a.dispatchEvent(clickEvent);
 
-                            a.dispatchEvent(clickEvent);
+                            }else{
+                                if( o.msg ){
+                                    $.snackbar({content: "Sorry, please uncomment the openbase_dir in your server's PHP Configuration.", timeout: 4000});
+                                }
 
-                        }else{
-                            if( o.msg ){
-                                $.snackbar({content: "Sorry, please uncomment the openbase_dir in your server's PHP Configuration.", timeout: 4000});
+                                $this.html("Save");
+                                if( o.filename ){
+                                    // window.$file
+                                    window.$imageFilename = o.filename;
+                                }
+                                if( typeof(whereToPost) != 'null' && typeof(whereToPost) != 'undefined' ){
+                                    postPhoto(whereToPost);
+                                }
                             }
-                            $this.html("Save");
-                        }
-                    }, 4000);
-                }( $this.html('&#10003; Redirecting...please wait.' )) );
-
-              // If you want the file to be visible in the browser 
-              // - please modify the callback in javascript. All you
-              // need is to return the url to the file, you just saved 
-              // and than put the image in your browser.
+                        }, 4000);
+                    }( $this.html('&#10003; Redirecting...please wait.' )) );
+                }
             }).fail(function(){
                 $this.html("Save");
                 (function (el) {
@@ -939,40 +941,16 @@
                         // Do all facebook stuffs here
 
                         whereToPost = $("#where_to_post").val();
-                        var optionsAlbum = $("input[name='optionsAlbum']:checked").val();
+                        // postPhoto(whereToPost);
 
-                        postPhoto();
-
-                        /*if( optionsAlbum == "create" ){
-                            // creates a new album
-                            var albumName = $("#album_name").val();
-                            FB.api('/me/albums', 'post', {
-                                name: albumName,
-                                message: '', // album description
-                                privacy: { "value" : 'ALL_FRIENDS' }
-                            }, function(response) {
-                                // response.id is the album id
-                                albumId = response.id;
-                                if( albumId !== undefined ){
-                                    postPhoto(albumId);
-                                }
-                                
-                                refreshWhereToPost(fbUserId);
-                            });
-                        }else if( optionsAlbum == "choose" ){
-                            // we'll use the existing selected album
-                            albumId = $("select#album").val();
-                            postPhoto(albumId);
-                        }else{
-                            postPhoto();
-                        }*/
+                        saveImageUpdates( whereToPost );
                         
                     } else {
                         console.log('User cancelled login or did not fully authorize.');
                     }
                 }, {scope: fbScope });
 
-                saveImageUpdates();
+                // saveImageUpdates();
             }else{
                 $.each(error_fields, function (i, row){
                     console.log(row);
@@ -1087,9 +1065,9 @@
                     error_fields.push({"field": "#target_url", "error": "Please enter a valid URL."});
                 }
 
-                $("#post_message").parent("div").fadeOut(function (){
-                    $("#post_title").parent("div").removeClass('hidden').fadeIn();
-                });
+                // $("#post_message").parent("div").fadeOut(function (){
+                //     $("#post_title").parent("div").removeClass('hidden').fadeIn();
+                // });
 
                 if( $("#post_title").val() === ""  ){
                     res = false;
@@ -1100,8 +1078,6 @@
                     res = false;
                     error_fields.push({"field": "#post_description", "error": "Please fill the Description field."});
                 }
-                
-
             }
 
             // if( $("#options_album_create").is(":checked") && $.trim( $("#album_name").val() ) === "" ){
@@ -1118,7 +1094,6 @@
             if( isSchedule && $("input#schedule").val() === "" ){
                 res = false;
                 error_fields.push({"field": "#schedule", "error": "Please specify date and time"});
-                
             }
 
             console.log(error_fields);
@@ -1141,7 +1116,7 @@
         
         
         $('#text_over_image').keyup( function(){
-
+            window.hasImageEffects = true;
             top_y = $("#image_size option:selected").data("id") == 1 ? 40 : 140;
 
             if( $from_php_width == 487 && $from_php_height == 255 ){
@@ -1174,6 +1149,7 @@
         });
 
         $('#bottom_text').keyup( function(){
+            window.hasImageEffects = true;
             bottom_y = $("#image_size option:selected").data("id") == "1" ? 450 : 340;
 
             if( $from_php_width == 487 && $from_php_height == 255 ){
@@ -1206,6 +1182,7 @@
         });
 
         $('#bottom_watermark').keyup( function(){
+            window.hasImageEffects = true;
             bottom_y = $("#image_size option:selected").attr("data-id") == 1 ? 475 : 365;
 
             if( $from_php_width == 487 && $from_php_height == 255 ){
@@ -1531,17 +1508,26 @@
             }, true);
         }
 
-        $("#target_url").bind("change keyup", function (){
-            if( $.trim( $(this).val() ) !== "" ){
-                $("#post_title").prev("label").html("Title");
-                $("#post_title").parent("div").fadeOut();
-                $("#post_message").parent("div").removeClass("hidden").fadeIn();
+        // $("#target_url").bind("change keyup", function (){
+        $("#target_url").change(function (){
+            console.log("changing..");
+            // if( $.trim( $(this).val() ) !== "" ){
+            //     $("#post_title").prev("label").html("Title");
+            //     $("#post_title").parent("div").addClass("hidden").fadeOut();
+            //     $("#post_message").parent("div").removeClass("hidden").fadeIn();
+            //     $("#post_description").parent("div").removeClass("hidden").fadeIn();
+            // }else{
+            //     $("#post_message").parent("div").fadeOut();
+            //     $("#post_title").parent("div").removeClass('hidden').fadeIn();
+            //     $("#post_title").prev("label").html("What's on your mind?");
+            //     $("#post_description").parent("div").fadeOut();
+            // }
+            if( $.trim( $(this).val() != "" ) ){
+                $("#post_title").prev("label").text("Title");
                 $("#post_description").parent("div").removeClass("hidden").fadeIn();
             }else{
-                $("#post_message").parent("div").fadeOut();
-                $("#post_title").parent("div").removeClass('hidden').fadeIn();
-                $("#post_title").prev("label").html("What's on your mind?");
-                $("#post_description").parent("div").fadeOut();
+                $("#post_title").prev("label").text("What's on your mind?");
+                $("#post_description").parent("div").addClass("hidden").fadeOut();
             }
         });
 
@@ -1663,6 +1649,9 @@
 
             $(".library-images").fadeOut();
             $("#btn_select_library").removeAttr("disabled");
+
+            var oldSearchResults = $("#inner_results").html();
+
             $("#inner_results").fadeIn(function (){
                 $(this).html('<div class="text-center text-subhead"><img src="'+imagesUrl+'ajax-loader.gif"> Please wait...</div>');
             });
@@ -1678,18 +1667,30 @@
             }).done(function(data){
 
                 $this.text("Image Search").removeAttr("disabled");
-                $("#inner_results").html("");
-                var x = 0;
+                
+                var x = 0, result = "";
 
-                var result = '<div><h4 id="results_no">'+data.hits.length+' image search results for "'+$("#img_search").val()+'"</h4></div><div class="rd-gallery">';
-                $.each(data.hits, function (i, row){
+                
+                if( typeof(data) != 'null' && typeof(data.hits) != 'null' ){
+                    $("#inner_results").html("");
 
-                    result+= '<div class="rd-gallery-item"><img height="132" width="132" src="'+
-                            row.previewURL+'"/><a href="?page=wp-social-mage-dashboard&action=add_filters" data-src="'+row.webformatURL+'" class="select image-from-url">Use this image</a></div>';
+                    result = '<div><h4 id="results_no">'+data.hits.length+' image search results for "'+$("#img_search").val()+'"</h4></div><div class="rd-gallery">';
+                    $.each(data.hits, function (i, row){
 
-                });
-                result+= "</div>";
-                $("#inner_results").append(result);
+                        result+= '<div class="rd-gallery-item"><img height="132" width="132" src="'+
+                                row.previewURL+'"/><a href="?page=wp-social-mage-dashboard&action=add_filters" data-src="'+row.webformatURL+'" class="select image-from-url">Use this image</a></div>';
+
+                    });
+                    result+= "</div>";
+
+                    $("#inner_results").append(result);
+                }else{
+                    // result = "<div><h4>Sorry, we can't find any results for that keyword this time. Please try again later or try another keyword.<h4></div>"
+                    $.snackbar({ content: "Sorry, we can't find any results for that keyword this time. Please try again later or try another keyword.", timeout: 6000});
+                    $("#inner_results").html(oldSearchResults);
+                }
+
+                // $("#inner_results").append(result);
             });
         });
 
