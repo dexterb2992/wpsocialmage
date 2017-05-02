@@ -2001,6 +2001,7 @@
             var btn = $(this);
             var $this = $("#update_image"), action = "update", filename = $("#image_preview").data("filename");
             btn.children('i').addClass('fa-spin');
+
             html2canvas($(".image-holder"), {
                 onrendered: function(canvas) {
                     dataURL = canvas.toDataURL();
@@ -2018,50 +2019,47 @@
                         },
                         beforeSend: function (){
                             btn.attr("disabled", "disabled").addClass("disabled");
-                        }
-                    }).done(function(o) {
+                        },
+                        success: function (o){
+                            console.log(o);
+                            (function (el) {
+                                setTimeout(function () {
+                                    btn.removeAttr("disabled").removeClass("disabled");
+                                    btn.text("Please wait...");
+                                    if( o.status == "success" && action == "update" ){
+                                        // window.location = '?page=wp-social-mage-dashboard&image='+filename;
+                                        var a = document.createElement('a');
+                                        a.href = '?page=wp-social-mage-dashboard&action=add_filters&image='+o.filename;
+                                        
+                                        // click event for firefox
+                                        var clickEvent = new MouseEvent("click", {
+                                            "view": window,
+                                            "bubbles": true,
+                                            "cancelable": false
+                                        });
 
-                        (function (el) {
-                            setTimeout(function () {
-                                btn.removeAttr("disabled").removeClass("disabled");
-                                btn.text("Please wait...");
-                                if( o.status == "success" && action == "update" ){
-                                    // window.location = '?page=wp-social-mage-dashboard&image='+filename;
-                                    var a = document.createElement('a');
-                                    a.href = '?page=wp-social-mage-dashboard&action=add_filters&image='+filename;
-                                    
-                                    // click event for firefox
-                                    var clickEvent = new MouseEvent("click", {
-                                        "view": window,
-                                        "bubbles": true,
-                                        "cancelable": false
-                                    });
+                                        a.dispatchEvent(clickEvent);
 
-                                    a.dispatchEvent(clickEvent);
-
-                                }else{
-                                    if( o.msg ){
-                                        $.snackbar({content: "Sorry, please make sure this folder has a 755 permission and/or uncomment the openbase_dir in your server's PHP Configuration.", timeout: 4000});
+                                    }else{
+                                        if( o.msg ){
+                                            $.snackbar({content: "Sorry, please make sure this folder has a 755 permission and/or uncomment the openbase_dir in your server's PHP Configuration.", timeout: 4000});
+                                        }
+                                        $this.html("Save");
                                     }
-                                    $this.html("Save");
-                                }
-                            }, 4000);
-                        }( $this.html('&#10003; Redirecting...please wait.' )) );
-
-                      // If you want the file to be visible in the browser 
-                      // - please modify the callback in javascript. All you
-                      // need is to return the url to the file, you just saved 
-                      // and than put the image in your browser.
-                    }).fail(function(){
-                        $this.html("Save");
-                        (function (el) {
-                            setTimeout(function () {
-                                $this.removeAttr("disabled").removeClass("disabled");
-                                el.next('span.saving-status').fadeOut(function(){
-                                    $(this).remove();
-                                });
-                            }, 4000);
-                        }( $this.after('<span class="saving-status" style="margin-left: 5px; color: red;">Error! Please try again later.</span>')) );
+                                }, 4000);
+                            }( $this.html('&#10003; Redirecting...please wait.' )) );
+                        },
+                        error: function (){
+                            $this.html("Save");
+                            (function (el) {
+                                setTimeout(function () {
+                                    $this.removeAttr("disabled").removeClass("disabled");
+                                    el.next('span.saving-status').fadeOut(function(){
+                                        $(this).remove();
+                                    });
+                                }, 4000);
+                            }( $this.after('<span class="saving-status" style="margin-left: 5px; color: red;">Error! Please try again later.</span>')) );
+                        }
                     });
                 }
             });
