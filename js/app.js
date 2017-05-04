@@ -232,26 +232,6 @@
             });
         }
 
-        // function get_albums(userId){
-        //     console.log("get_albums is called");
-        //     $.ajax({
-        //         url: fbHost+fbUserId+'/albums?fields=id,can_upload,name&access_token='+fbAccessToken,
-        //         type: 'get',
-        //         assync: false,
-        //     }).done(function (response){
-        //         console.log(response);
-        //         if( response.hasOwnProperty('data') ){
-        //             if(response.data.length < 1){
-        //                 show_results_for_albums();
-        //             }
-        //         }
-
-        //         if (response && !response.error) {
-        //             get_graph_api_request_assync(response, "albums", show_results_for_albums);
-        //         }
-        //     });
-        // }
-
         function show_results_for_where_to_post(){
             console.log("show_results_for_where_to_post is called");
             $("#where_to_post").html('<option value="me">My Wall</option><optgroup label="Pages">'+pages+"</optgroup>"+'<optgroup label="Groups">'+groups+"</optgroup>");
@@ -380,7 +360,7 @@
                 try {
                     var btn = $("#post_to_fb");
 
-                    btn.html("Please wait...").addClass("disabled").attr("disabled", "disabled");
+                    
 
                     $.each(whereToPost, function(i, row){
                         var check_if_page = $.inArray(row, pages_array);
@@ -400,16 +380,22 @@
                                 cache: false,
                                 beforeSend: function (){
                                     console.log("posting to "+row+' feed...');
+                                    btn.html("Please wait...").addClass("disabled").attr("disabled", "disabled");
                                 },
                                 success: function (data){
                                     console.log("response when target_url is not empty:");
                                     console.log(data);
 
                                     $.snackbar({content: "Successfully posted to your "+postLocation, timeout: 4000});
+                                    btn.html("POST").removeClass("disabled").removeAttr("disabled");
                                 },
                                 error: function (shr, status, data){
                                     $.snackbar({content: "Failed when posting to "+postLocation+data+" status "+shr.status, timeout: 4000});
                                     console.log("Error when posting to "+row+" feed. "+data+" status "+shr.status);
+                                    btn.html("POST").removeClass("disabled").removeAttr("disabled");
+                                },
+                                complete: function () {
+                                    btn.removeAttr("disabled").removeClass("disabled").html("POST");
                                 }
                             });
                         }
@@ -557,7 +543,7 @@
          * by default, whereToPost is null
         */
         function saveImageUpdates(whereToPost){
-            var $this = $("#update_image"), action = $this.data("action"), filename = $("#image_preview").data("filename");
+            var $this = $("#update_image"), action = $this.data("action"), filename = $("#image_preview").attr("data-filename");
 
             $this.html("Saving...");
             var current_height = $("#image_preview").height(),
@@ -567,22 +553,27 @@
                 current_height < 487  || current_width < 255 ) ){
                 window.hasImageEffects = true;
             }
+
+
+            if( $("#text_over_image").val() != "" || $("#bottom_text").val() != "" || $("#bottom_watermark").val() != ""){
+                window.useRasterizeHtmlRenderer = true;
+            }
+
             // $("#image_preview").width()
             console.log("hasImageEffects: "+window.hasImageEffects);
             
             // if action is 'save', then we'll check if the image don't have text so we don't need to re-render it, same
             // goes if the image is already on 487x255 or 500x500, we should not render the image
             
-            // if( window.hasImageEffects === false && action == 'update' && $from_php_width < 550){
-            if( window.hasImageEffects === false && action == 'update' &&
-                 (current_width == 500 && current_width == 500) || (current_width == 487 && current_height == 255)){
+            if( window.hasImageEffects === false && action == 'update' && window.useRasterizeHtmlRenderer === false && 
+                 (current_width == 500 && current_width == 500) || (current_width == 487 && current_height == 255)
+                && getUrlParameter('action') == 'add_filters' ){
                 $this.html('&#10003; Redirecting...please wait.');
                 // save the image without re-rendering
                 window.location = '?page=wp-social-mage-dashboard&image='+filename;
             }
 
-            if( getUrlParameter('action') == 'add_filters' ){
-
+            if( getUrlParameter('action') == 'add_filters'){
                 html2canvas( $(".image-holder"), {
                     onrendered: function(canvas) {
                         theCanvas = canvas;
@@ -1508,24 +1499,14 @@
             }, true);
         }
 
-        // $("#target_url").bind("change keyup", function (){
         $("#target_url").change(function (){
-            console.log("changing..");
-            // if( $.trim( $(this).val() ) !== "" ){
-            //     $("#post_title").prev("label").html("Title");
-            //     $("#post_title").parent("div").addClass("hidden").fadeOut();
-            //     $("#post_message").parent("div").removeClass("hidden").fadeIn();
-            //     $("#post_description").parent("div").removeClass("hidden").fadeIn();
-            // }else{
-            //     $("#post_message").parent("div").fadeOut();
-            //     $("#post_title").parent("div").removeClass('hidden').fadeIn();
-            //     $("#post_title").prev("label").html("What's on your mind?");
-            //     $("#post_description").parent("div").fadeOut();
-            // }
-            if( $.trim( $(this).val() != "" ) ){
+
+            if( $.trim( $(this).val() ) != "" ){
                 $("#post_title").prev("label").text("Title");
                 $("#post_description").parent("div").removeClass("hidden").fadeIn();
+                console.log("not empty");
             }else{
+                console.log("yes, tis empty");
                 $("#post_title").prev("label").text("What's on your mind?");
                 $("#post_description").parent("div").addClass("hidden").fadeOut();
             }
@@ -1999,7 +1980,7 @@
 
         $("#btn_update_image").click(function (){
             var btn = $(this);
-            var $this = $("#update_image"), action = "update", filename = $("#image_preview").data("filename");
+            var $this = $("#update_image"), action = "update", filename = $("#image_preview").attr("data-filename");
             btn.children('i').addClass('fa-spin');
 
             html2canvas($(".image-holder"), {

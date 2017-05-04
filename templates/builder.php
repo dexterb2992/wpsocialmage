@@ -54,7 +54,7 @@
 								</script>
 								<div class="image-holder-outer">
 									<div class="image-holder" style="<?php echo 'width:'.$image_width.'px; height:'.$image_height.'px;';?>"> 
-										<img id="image_preview"  class="image-preview" data-filename="<?php echo $img; ?>"
+										<img id="image_preview"  class="image-preview" data-filename="<?php echo $_GET['image']; ?>"
 											src="<?php echo $img; ?>" data-src="<?php echo $img; ?>">
 									</div>
 								</div>

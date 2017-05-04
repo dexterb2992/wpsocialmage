@@ -188,44 +188,22 @@ if( !function_exists('saveCanvas') ){
 		if( isset($_INPUT['data_action']) && $_INPUT['data_action'] == "save" ){
 			if( isset($_INPUT['filename']) ){
 				$filename = pathinfo($_INPUT['filename'], PATHINFO_BASENAME);
-				// $file_path = WP_SM_UPLOADS_FOLDER_ABS_PATH . $filename;
 				
-				// if( file_exists($file_path) ){
-				// 	unlink($file_path);
-				// }
-			}else{
-				$filename = get_current_user_id()."_".time().'.png';
+				if( file_exists( WP_SM_UPLOADS_FOLDER_ABS_PATH . $filename) ){
+					unlink($file_path);
+				}
 			}
-			/*}else{
-				$filename = get_current_user_id()."_".time().'.png';
-			}*/
-			
-			// $file_path = WP_SM_UPLOADS_FOLDER_ABS_PATH . $filename;
-		}else{
-			
-			// if( file_exists(WP_SM_UPLOADS_FOLDER_ABS_PATH . $_INPUT['filename']) ){
-			// 	unlink($file_path);
-			// }
-
-			$filename = get_current_user_id()."_".time().'.png';
-			// $file_path = WP_SM_UPLOADS_FOLDER_ABS_PATH . $filename;
-
-			// $filename = $_INPUT['filename'];
-			// $file_path = WP_SM_UPLOADS_FOLDER_ABS_PATH . $filename;
 		}
 
+		$filename = get_current_user_id()."_".time().'.png';
 		$file_path = WP_SM_UPLOADS_FOLDER_ABS_PATH . $filename;
 
-		if( file_exists($file_path) ){
-			unlink($file_path);
-		}
-		
 		$img = str_replace('data:image/png;base64,', '', $img);
 		$img = str_replace(' ', '+', $img);
 		$fileData = base64_decode($img);
 		//saving
 		
-		$fp = fopen($file_path,'wa+');
+		$fp = fopen($file_path,'x');
 		fwrite($fp, $fileData);
 		fclose($fp); 
 
@@ -308,26 +286,6 @@ if( !function_exists('generateLongLiveFBToken') ){
 if( !function_exists('getLongLiveFBToken') ){
 	function getLongLiveFBToken($_INPUT){
 		return generateLongLiveFBToken($_INPUT);
-		// $shortLiveToken = $_INPUT['short_life_token'];
-
-		// $app_id = isset($_INPUT['fb_app_id']) ? $_INPUT['fb_app_id'] : WP_SM_FB_APP_ID;
-		// $app_secret = isset($_INPUT['fb_app_secret']) ? $_INPUT['fb_app_secret'] : WP_SM_FB_APP_SECRET;
-
-		// $url = "https://graph.facebook.com/oauth/access_token?client_id=$app_id&client_secret=$app_secret&grant_type=fb_exchange_token&fb_exchange_token=".$shortLiveToken;
-		// $data = getPageData($url);
-
-		// $res = explode('&', $data);
-		// $arr = explode('=', $res[0]);
-		// $arr2 = explode('=', $res[1]);
-
-		// if( $arr[1] !== null && $arr[1] != "" ){
-		// 	update_user_access_token($arr[1]);
-		// 	return json_encode( array( 'status' => '200', "longLiveAccessToken" => $arr[1], "expiresIn" => (int)$arr2[1], "shortLiveAccessToken" => $shortLiveToken ) );
-
-		// }
-		
-		// return json_encode( array('status' => '500', 'longLiveAccessToken' => null, 'expiresIn' => null, 'msg' => 'Sorry, we can\'t generate a longlive access token right now. Please try again later.') );
-
 	}
 }
 
@@ -378,16 +336,10 @@ if( !function_exists('grabImageFromUrl') ){
 			) );
 		}
 
-	  	// $image_data = getPageData($src);
-
 	  	// let's get the image original extension
 	  	$ext = pathinfo($src, PATHINFO_EXTENSION);
 
 		$filename = trim( get_current_user_id()."_".time().'.'.$ext );
-
-		// $fp = fopen(WP_SM_UPLOADS_FOLDER_ABS_PATH . $filename,'x');
-		// fwrite($fp, $image_data);
-		// fclose($fp); 
 
 		grabImage($src, WP_SM_UPLOADS_FOLDER_ABS_PATH . $filename);
 

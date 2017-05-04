@@ -28,9 +28,6 @@
 									$image_width = 487;
 								}
 
-								// $image_height = 500;
-								// $image_width = 500;
-
 								?>
 								<script type="text/javascript">
 									var $from_php_width = '<?php echo $width; ?>';

@@ -22,7 +22,7 @@
 	$key = get_option('wp_social_mage_key');
 	$lkey = get_option('wp_social_mage_lkey');
 
-	$res =  csna_manual_decrypt($lkey, $key, 'standard_wl');
+	$res =  csna_manual_decrypt($lkey, $key, 'standard');
 
 	$email = isset($res['email']) && ($res['email'] != "invalid") ? $res['email'] : 'n/a';
 

@@ -122,3 +122,15 @@ version 1.3.7
 	- fix upload paths
 	- updated the look and feel
 	- force to delete old file when there are some changes on the image (functions.php:205-206)
+
+	- Fix bug on image search: sometimes 2 ajax request are sent to the server
+	- Done several tests at cjst.pw
+	- Fix bug when posting clickable images to user groups
+	    > Conclusion: When the application request for the permission during facebook login, you need to choose Public, not Only Me
+	- Fix bug on image filters not saving right
+	- Fix bug on image texts not saving
+
+	- Fix image update on image filters page
+	- Fix blurry texts on the image when being posted to facebook.
+	- Fix image not resizing correctly when image filter is applied
+	- Code cleanup (remove commented section of codes)
