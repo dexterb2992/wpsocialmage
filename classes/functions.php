@@ -160,10 +160,13 @@ if( !function_exists('saveSchedule') ){
 			'message' => $_INPUT['message'],
 			'title' => $_INPUT['title'],
 			'description' => $_INPUT['description'],
-			'album_name' => $is_create_album == 1 ? $_INPUT['album_name'] : '',
-			'album' => $is_create_album == 0 ? $_INPUT['select_album'] : '',
-			'is_create_album' => $is_create_album,
-			'image_filename' => WP_SM_UPLOADS_FOLDER.$_INPUT['image'],
+			// 'album_name' => $is_create_album == 1 ? $_INPUT['album_name'] : '',
+			// 'album' => $is_create_album == 0 ? $_INPUT['select_album'] : '',
+			// 'is_create_album' => $is_create_album,
+			'album_name' => '',
+			'album' => '',
+			'is_create_album' => 0,
+			'image_filename' => WP_SM_UPLOADS_FOLDER.$_INPUT['new_filename'],
 			'schedule' => $schedule,
 			'where_to_post' => $_INPUT['whereToPost'],
 			'where_to_post_page' => $_INPUT['whereToPostPage']
@@ -195,7 +198,12 @@ if( !function_exists('saveCanvas') ){
 			}
 		}
 
-		$filename = get_current_user_id()."_".time().'.png';
+		if( isset( $_INPUT['new_filename'] ) ){
+			$filename = $_INPUT['new_filename'];
+		}else{
+			$filename = get_current_user_id()."_".time().'.png';
+		}
+
 		$file_path = WP_SM_UPLOADS_FOLDER_ABS_PATH . $filename;
 
 		$img = str_replace('data:image/png;base64,', '', $img);

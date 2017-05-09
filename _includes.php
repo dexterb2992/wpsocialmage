@@ -14,6 +14,7 @@
 	window.whiteLabelUrl = 'http://topdogimsoftware.com/whitelabel-platform/';
 	var currentTimezone = '<?php echo WP_SM_CURRENT_TIMEZONE; ?>';
 	window.$imageFilename = "<?php echo isset($_GET['image']) ? $_GET['image'] : ''; ?>";
+	var currentUser = "<?php echo get_current_user_id(); ?>";
 </script>
 
 

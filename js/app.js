@@ -42,6 +42,14 @@
         instantiateCanvas();
 
     /* START JQUERY FUNCTIONS */
+        function objectifyForm(formArray) {//serialize data function
+            var returnArray = {};
+            for (var i = 0; i < formArray.length; i++){
+                returnArray[formArray[i]['name']] = formArray[i]['value'];
+            }
+            return returnArray;
+        }
+
         function getUrlParameter(sParam) {
             var sPageURL = decodeURIComponent(window.location.search.substring(1)),
                 sURLVariables = sPageURL.split('&'),
@@ -541,8 +549,9 @@
         /**
          * define whereToPost if after saving the image the app needs to post to fb
          * by default, whereToPost is null
+         * newFilename is used when you specify what the new filename should be
         */
-        function saveImageUpdates(whereToPost){
+        function saveImageUpdates(whereToPost, newFilename){
             var $this = $("#update_image"), action = $this.data("action"), filename = $("#image_preview").attr("data-filename");
 
             $this.html("Saving...");
@@ -595,14 +604,14 @@
                         context.drawImage(renderResult.image, 10, 25);
 
                         dataURL = canvas.toDataURL();
-                        ajax_save_image_updates(dataURL, filename, action, $this, whereToPost);
+                        ajax_save_image_updates(dataURL, filename, action, $this, whereToPost, newFilename);
                     });
 
                 }else{
                     html2canvas($(".image-holder"), {
                         onrendered: function(canvas) {
                             dataURL = canvas.toDataURL();
-                            ajax_save_image_updates(dataURL, filename, action, $this, whereToPost);
+                            ajax_save_image_updates(dataURL, filename, action, $this, whereToPost, newFilename);
                         }
                     });
                 }
@@ -613,7 +622,7 @@
 
         // Heads Up!: $this is the button
         // if whereToPost is defined, we will proceed to postPhoto
-        function ajax_save_image_updates(dataURL, filename, action, $this, whereToPost){
+        function ajax_save_image_updates(dataURL, filename, action, $this, whereToPost, newFilename){
             $this.attr("disabled", "disabled").addClass("disabled");
                     
             $.ajax({
@@ -627,7 +636,8 @@
                     imgBase64: dataURL,
                     data_action : action,
                     q : "save_canvas",
-                    filename : filename
+                    filename : filename,
+                    new_filename: newFilename
                 },
                 success: function (o){
                     console.log(o);
@@ -961,83 +971,68 @@
             $(this).bootstrapMaterialDatePicker({ format : 'DD/MM/YYYY HH:mm', minDate : new Date() });
         });
 
-        $("#schedule").change(function(){
-            if( $.trim(fbUserId) == "" ){
-                alert("Please login with facebook first.");
-            }else{
-                if( validate_inputs(true) ){
-                    $.ajax({
-                        
-                        url: ajaxurl,
-                        type: 'post',
-                        dataType: 'json',
-                        data: { 
-                            action: 'WpSocialMageAjax',
-                            q : 'get_user_type', 
-                            type: 'pro' 
-                        }
-                    }).done(function (data){
-                        if( data.type == "pro" || data.type == "pro_wl" ){
+        $("#schedule").change(function (){
+            whereToPost = $("#where_to_post").val();
 
-                            whereToPost = $("#where_to_post").val();
-                            saveImageUpdates();
+            var date = new Date();
+            var newFilename = window.currentUser+"_"+date.getTime()+".png";
 
-                            // try
-                            window.whereToPost = whereToPost;
-                            window.pagesArray = pages_array;
+            saveImageUpdates(null, newFilename);
 
-                            var neoWhereToPost = whereToPost;
-                            var whereToPostPage = [];
+            // try
+            window.whereToPost = whereToPost;
+            window.pagesArray = pages_array;
+
+            var neoWhereToPost = whereToPost;
+            var whereToPostPage = [];
 
 
-                            $.each(whereToPost, function(i, row){
-                                
-                                var check_if_page = $.inArray(row, pages_array);
+            $.each(whereToPost, function(i, row){
+                
+                var check_if_page = $.inArray(row, pages_array);
 
-                                if( check_if_page !== -1 ){  // it means, the row is a page ID   
-                                    // save to array
-                                    whereToPostPage.push(row);
+                if( check_if_page !== -1 ){  // it means, the row is a page ID   
+                    // save to array
+                    whereToPostPage.push(row);
 
-                                    neoWhereToPost = $.grep(neoWhereToPost, function(value){
-                                        return value != row;
-                                    });
-                                }
-                            });
-
-                            window.neoWhereToPost = neoWhereToPost;
-                            whereToPost = neoWhereToPost;
-
-
-                            $("#_fbtoken").val(fbAccessToken);
-                            $.ajax({
-                                url: ajaxurl,
-                                data : "action=wpSocialMageAjax&"+$("#wp_social_mage_form").serialize()+"&fbUserId="+fbUserId+"&whereToPost="+whereToPost+"&whereToPostPage="+whereToPostPage,
-                                type : 'post',
-                                dataType : 'json'
-                            }).done(function (data){
-                                console.log(data);
-                                if( data.status == "success" || data.status_code == '200' ){
-                                    alert("Post scheduled successfully.");
-                                }else{
-                                    alert("Sorry, we can't process your request right now. Plese check back later.");   
-                                }
-                            });
-                        }else{
-                            activateModal('pro_upgrade');
-                        }
-                    });
-                }else{
-                    console.log(error_fields);
-                    $.each(error_fields, function (i, row){
-                        $(row.field).addClass("dirty");
-                        $.snackbar({ content: row.error, timeout: 6000});
+                    neoWhereToPost = $.grep(neoWhereToPost, function(value){
+                        return value != row;
                     });
                 }
-            } 
+            });
 
+            window.neoWhereToPost = neoWhereToPost;
+            whereToPost = neoWhereToPost;
+
+
+            $("#_fbtoken").val(fbAccessToken);
+
+            var data = objectifyForm( $("#wp_social_mage_form").serializeArray() );
+                data.action = "WpSocialMageAjax";
+                data.fbUserId = fbUserId;
+                data.whereToPost = whereToPost;
+                data.whereToPostPage = whereToPostPage;
+                data.new_filename = newFilename;
+
+            $.ajax({
+                url: ajaxurl,
+                data: data,
+                type: 'post',
+                dataType: 'json',
+                success: function (data){
+                    console.log(data);
+                    if( data.status == "success" || data.status_code == '200' ){
+                        alert("Post scheduled successfully.");
+                    }else{
+                        alert("Sorry, we can't schedule a post right now. Please try again later.");   
+                    }
+                },
+                error: function (data){
+                    alert("Sorry, something went wrong. Probably, a server issue. Please send a support ticket if this issue persists.");
+                }
+            });
         });
 
-        
         // @param boolean isSchedule  = false if post directly, true if schedule posting
         function validate_inputs(isSchedule){
             var res = true;
@@ -1055,10 +1050,6 @@
                     res = false;
                     error_fields.push({"field": "#target_url", "error": "Please enter a valid URL."});
                 }
-
-                // $("#post_message").parent("div").fadeOut(function (){
-                //     $("#post_title").parent("div").removeClass('hidden').fadeIn();
-                // });
 
                 if( $("#post_title").val() === ""  ){
                     res = false;
