@@ -143,7 +143,6 @@ if( !function_exists('getFonts') ){
 if( !function_exists('saveSchedule') ){
 	function saveSchedule($_INPUT){
 		global $wpdb;
-		
 		$is_create_album = $_INPUT['optionsAlbum'] == "create" ? 1 : 0;
 		date_default_timezone_set(WP_SM_CURRENT_TIMEZONE);
 
@@ -154,22 +153,32 @@ if( !function_exists('saveSchedule') ){
 		//Modify error
 		$schedule = $my_dt->format( 'Y-m-d H:i:s' );
 
+		$where_to_post = "";
+		$where_to_post_page = "";
+
+		if( isset($_INPUT['whereToPost']) && is_array($_INPUT['whereToPost']) ){
+			$where_to_post = implode(',', $_INPUT['whereToPost']);
+		}
+
+		if( isset($_INPUT['whereToPostPage']) && is_array($_INPUT['whereToPostPage']) ){
+			$where_to_post_page = implode(',', $_INPUT['whereToPostPage']);
+		}
+
+
+
 		$vals = array(
 			'wp_user_id' => get_current_user_id(),
 			'url' => $_INPUT['url'], 
 			'message' => $_INPUT['message'],
 			'title' => $_INPUT['title'],
 			'description' => $_INPUT['description'],
-			// 'album_name' => $is_create_album == 1 ? $_INPUT['album_name'] : '',
-			// 'album' => $is_create_album == 0 ? $_INPUT['select_album'] : '',
-			// 'is_create_album' => $is_create_album,
 			'album_name' => '',
 			'album' => '',
 			'is_create_album' => 0,
 			'image_filename' => WP_SM_UPLOADS_FOLDER.$_INPUT['new_filename'],
 			'schedule' => $schedule,
-			'where_to_post' => $_INPUT['whereToPost'],
-			'where_to_post_page' => $_INPUT['whereToPostPage']
+			'where_to_post' => $where_to_post,
+			'where_to_post_page' => $where_to_post_page
 
 		);
 

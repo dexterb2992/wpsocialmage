@@ -972,6 +972,17 @@
         });
 
         $("#schedule").change(function (){
+            // validate inputs 
+            if( !validate_inputs(true) ){
+                $.each(error_fields, function (i, row){
+                    console.log(row);
+                    $(row.field).addClass("dirty");
+                    $.snackbar({ content: row.error, timeout: 6000 });
+                });
+                
+                return false;
+            }
+
             whereToPost = $("#where_to_post").val();
 
             var date = new Date();
@@ -1061,17 +1072,6 @@
                     error_fields.push({"field": "#post_description", "error": "Please fill the Description field."});
                 }
             }
-
-            // if( $("#options_album_create").is(":checked") && $.trim( $("#album_name").val() ) === "" ){
-
-            //     res = false;
-            //     error_fields.push({"field": "#album_name", "error": "Please provide an Album Name"});
-                
-
-            // }else if( $("#options_album_choose").is(":checked") && $("#album").val() === "" ){
-            //     res = false;
-            //     error_fields.push({"field": "#album", "error": "Please choose an existing album"});
-            // }
 
             if( isSchedule && $("input#schedule").val() === "" ){
                 res = false;

@@ -196,7 +196,7 @@ function wp_social_mage_create_tables() {
           is_create_album int(1) NOT NULL default 0,
           album_name varchar(255),
           album varchar(255),
-          where_to_post varchar(255) NOT NULL,
+          where_to_post varchar(255),
           where_to_post_page varchar(255),
           image_filename varchar(255),
           schedule datetime NOT NULL,
