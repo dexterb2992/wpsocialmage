@@ -271,7 +271,17 @@ if( !function_exists('update_user_access_token') ){
 
 if( !function_exists('generateLongLiveFBToken') ){
 	function generateLongLiveFBToken($_INPUT){
-		$shortLiveToken = $_INPUT['fb_shortlive_auth_token'];
+		$additional_errors = "";
+
+		if( isset($_INPUT['fb_shortlive_auth_token']) ){
+			$shortLiveToken = $_INPUT['fb_shortlive_auth_token'];
+		}
+
+		if( isset($_INPUT['short_life_token']) ){
+			$shortLiveToken = $_INPUT['short_life_token'];
+		}
+
+		$additional_errors = $shortLiveToken == "" ? "Short-lived access token is empty." : "";
 
 		$app_id = isset($_INPUT['fb_app_id']) ? $_INPUT['fb_app_id'] : WP_SM_FB_APP_ID;
 		$app_secret = isset($_INPUT['fb_app_secret']) ? $_INPUT['fb_app_secret'] : WP_SM_FB_APP_SECRET;
@@ -291,9 +301,9 @@ if( !function_exists('generateLongLiveFBToken') ){
 				)
 			);
 
+		}else{
+			return json_encode( array('status' => '500', 'data' => $data, 'longLiveAccessToken' => null, 'expiresIn' => null, 'msg' => 'Sorry, we can\'t generate a long-lived access token right now. Please make sure your App ID and App Secret are correct.'.$additional_errors) );
 		}
-
-		return json_encode( array('status' => '500', 'data' => $data, 'longLiveAccessToken' => null, 'expiresIn' => null, 'msg' => 'Sorry, we can\'t generate a longlive access token right now. Please make sure your App ID and App Secret are correct.') );
 
 	}
 }
@@ -394,7 +404,6 @@ if( !function_exists('updateSettings') ){
 		$wpdb->show_errors();
 
 		$vals = array(
-			'wp_user_id' => get_current_user_id(),
 			'user_domain' => get_site_url()
 		);
 
@@ -418,8 +427,9 @@ if( !function_exists('updateSettings') ){
 		
 
 		if( !empty($CURRENT_SETTINGS[0]) ){
-			$res = $wpdb->update($wpdb->wp_social_mage_settings, $vals, array('wp_user_id' => $CURRENT_SETTINGS[0]['wp_user_id']));
+			$res = $wpdb->update($wpdb->wp_social_mage_settings, $vals, array('wp_user_id' => get_current_user_id() ));
 		}else{
+			$vals['wp_user_id'] = get_current_user_id();
 			$res = $wpdb->insert($wpdb->wp_social_mage_settings, $vals);
 		}
 
@@ -429,8 +439,8 @@ if( !function_exists('updateSettings') ){
 	    return json_encode( 
 	    	array(
 	    		"status_code"=>"500", 
-	    		"msg" => "Sorry, something went wrong. Please try again later.", 
-	    		"error" =>  $wpdb->print_error(), 
+	    		"msg" => "No changes has been saved..", 
+	    		"error" =>  '', 
 	    		"more_info" => $wpdb->last_query
 	    	) 
 	    );

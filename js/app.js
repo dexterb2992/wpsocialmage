@@ -23,11 +23,12 @@
         // note: error_fields structure is 'field' => html element(#el or .el tag), 'error' => the error message
         var error_fields = [];
 
-        function fbInit(appId){
+        // boolean generatesToken 
+        function fbInit(appId, generatesToken){
             FB.init({ appId: appId, status: true, cookie: true, xfbml: true, oauth: true, channelUrl: channelUrl });
 
             fbApiInit = true;
-            checkUserFbStatus();
+            checkUserFbStatus(generatesToken);
         }
 
     /* FB init */
@@ -493,8 +494,7 @@
             });
         }
 
-        function getLongLiveFBToken(){
-            console.log("Getting LongLive FB Token...");
+        function getLongLiveFBToken(callback){
             $.ajax({
                 url: ajaxurl,
                 type : 'post',
@@ -506,11 +506,18 @@
                 dataType : 'json',
                 beforeSend: function (){
                     console.log("getting long live access token...");
-                }
-            }).done(function(data){
-                console.log(data);
-                if( data.longLiveAccessToken !== "" ){
-                    $(document).find("input#_fbtoken").val(data.longLiveAccessToken);
+                },
+                success: function (data){
+                    console.log(data);
+                    if( data.longLiveAccessToken !== "" ){
+                        $(document).find("input#_fbtoken").val(data.longLiveAccessToken);
+
+                    }
+
+                    if( callback ){ callback(); }
+                },
+                error: function (data){
+                    console.warn(data);
                 }
             });
         }
@@ -1459,7 +1466,8 @@
             }
         }
 
-        function checkUserFbStatus(){
+        // boolean generatesToken
+        function checkUserFbStatus(generatesToken){
             console.log("checkUserFbStatus is called");
             FB.getLoginStatus(function(response) {
               if (response.status === 'connected') {
@@ -1472,10 +1480,12 @@
                 fbAccessToken = response.authResponse.accessToken;
 
                 $("#connect_to_facebook").parent("div").slideUp();
-                getLongLiveFBToken();    
-                // let's get all the existing albums of the current user here
-
-                refreshWhereToPost(fbUserId);
+                
+                if( generatesToken ){
+                    getLongLiveFBToken();  
+                }else{
+                    refreshWhereToPost(fbUserId);
+                }
 
               } else if (response.status === 'not_authorized') {
                 // the user is logged in to Facebook, 
@@ -1840,14 +1850,14 @@
                     // fbAppId = form.find('input[name="fb_app_id"]').val().replace(/[^0-9]/g,''); // ensure that it's only numbers
                     var newfbAppId = form.find('input[name="fb_app_id"]').val().replace(/[^0-9]/g,''); // ensure that it's only numbers
                     
-                    fbInit(newfbAppId);
+                    fbInit(newfbAppId, false);
 
                     window.fbApiInit = true; //init flag
                     
 
                     fbAppId = newfbAppId;
 
-                     fbEnsureInit(function() {
+                    fbEnsureInit(function() {
                         try{
                             // this will be executed if FB is initialized
                             FB.login(function(response) {
@@ -1857,7 +1867,7 @@
 
                                     fbUserId = response.authResponse.userID;
                                     fbAccessToken = response.authResponse.accessToken;     
-                                    refreshWhereToPost(fbUserId); 
+                                    // refreshWhereToPost(fbUserId); 
 
                                     $.ajax({
                                         assync: false,
@@ -1866,7 +1876,7 @@
                                         type: 'post',
                                         dataType: 'json',
                                         beforeSend: function (){
-                                            console.log('generating longlive_token');
+                                            console.log('..generating longlived_token..');
                                         },
                                         data: {
                                             action: 'WpSocialMageAjax',
@@ -1875,46 +1885,55 @@
                                             fb_app_secret: form.find('input[name="fb_app_secret"]').val(),
                                             fb_user_id: fbUserId,
                                             fb_shortlive_auth_token: fbAccessToken,
-                                        }
-                                    }).done(function (response){
-                                        if( response.status == '200' ){
-                                            $.snackbar({ content: "Your facebook has been successfully connected.", timeout: 6000});
-                                            $.ajax({
-                                                
-                                                url: ajaxurl,
-                                                type: 'post',
-                                                dataType: 'json',
-                                                data: {
-                                                    action: 'WpSocialMageAjax',
-                                                    q: 'update_settings', 
-                                                    fb_app_id: fbAppId, 
-                                                    fb_app_secret: form.find('input[name="fb_app_secret"]').val(),
-                                                    fb_user_id: fbUserId,
-                                                    fb_auth_token: response.longLiveAccessToken,
-                                                    timezone: $('#timezone_setting').val()
-                                                }
-                                            }).done(function(data){
-                                                if( data.status_code == "200" ){
-                                                    $("#timezone_setting").html($('#timezone_setting').val());
-                                                    $.snackbar({ content: "Your Settings have been saved.", timeout: 4000});
+                                        }, 
+                                        success: function (response){
+                                            if( response.status == '200' ){
+                                                $.snackbar({ content: "Your facebook has been successfully connected.", timeout: 6000});
+                                                $.ajax({
+                                                    
+                                                    url: ajaxurl,
+                                                    type: 'post',
+                                                    dataType: 'json',
+                                                    data: {
+                                                        action: 'WpSocialMageAjax',
+                                                        q: 'update_settings', 
+                                                        fb_app_id: fbAppId, 
+                                                        fb_app_secret: form.find('input[name="fb_app_secret"]').val(),
+                                                        fb_user_id: fbUserId,
+                                                        fb_auth_token: response.longLiveAccessToken,
+                                                        timezone: $('#timezone_setting').val()
+                                                    },
+                                                    success: function (data){
+                                                        if( data.status_code == "200" ){
+                                                            $("#timezone_setting").html($('#timezone_setting').val());
+                                                            $.snackbar({ content: "Your Settings have been saved.", timeout: 4000});
+                                                            $("#wp_sm_save_settings").html("<i class='fa fa-facebook-official'></i> Save & Connect to Facebook");
+                                                            $(".rd-icon-home span a").click();
+                                                        }else{
+                                                            if( typeof(data.msg) != 'undefined' ){
+                                                                $.snackbar({ content: data.msg, timeout: 4000});
+                                                                $("#wp_sm_save_settings").html("<i class='fa fa-facebook-official'></i> Save & Connect to Facebook");
+                                                            }
+                                                        }
+                                                    },
+                                                    error: function (data){
+                                                        console.log(data);
+                                                        $("#wp_sm_save_settings").html("<i class='fa fa-facebook-official'></i> Save & Connect to Facebook");
+                                                    }
+                                                });
+                                            }else{
+                                                if( response.msg ){
+                                                    $.snackbar({ content: response.msg, timeout: 4000 });
                                                     $("#wp_sm_save_settings").html("<i class='fa fa-facebook-official'></i> Save & Connect to Facebook");
-                                                    $(".rd-icon-home span a").click();
                                                 }
-                                            }).fail(function(data){
-                                                console.log(data);
-                                                $("#wp_sm_save_settings").html("<i class='fa fa-facebook-official'></i> Save & Connect to Facebook");
-                                            });
-                                        }else{
-                                            if( response.msg ){
-                                                $.snackbar({ content: response.msg, timeout: 4000 });
-                                                $("#wp_sm_save_settings").html("<i class='fa fa-facebook-official'></i> Save & Connect to Facebook");
+                                                
                                             }
-                                            
+                                        },
+                                        error: function (data){
+                                            console.log(data);
+                                            console.log('Error generating long live auth token');
+                                            $("#wp_sm_save_settings").html("<i class='fa fa-facebook-official'></i> Save & Connect to Facebook");
                                         }
-                                    }).fail(function(data){
-                                        console.log(data);
-                                        console.log('Error generating long live auth token');
-                                        $("#wp_sm_save_settings").html("<i class='fa fa-facebook-official'></i> Save & Connect to Facebook");
                                     });
 
                                 } else {

@@ -3,7 +3,7 @@
 Plugin Name: WP Social Mage
 Plugin URI: http://topdogwpsocialmage.com
 Description: Find images, create memes and clickable images and post your creations automatically to your Facebook wall, groups and pages.
-Version: 1.3.8
+Version: 1.3.9
 Author: Rob Maggs
 Author URI: http://stealthymarketer.co.uk/about/
 */
@@ -15,16 +15,14 @@ if (!defined('WP_SM_VERSION_KEY'))
     define('WP_SM_VERSION_KEY', 'wp_sm_version');
 
 if (!defined('WP_SM_VERSION_NUM'))
-    define('WP_SM_VERSION_NUM', '1.0.0');
+    define('WP_SM_VERSION_NUM', '1.3.9');
 
 add_option(WP_SM_VERSION_KEY, WP_SM_VERSION_NUM);
-
-add_option('wp_sm_version', '1.0.0');
 
 add_action( 'admin_menu', 'wp_social_mage_admin_menu' );
 add_action( 'wp_en queue_scripts', 'wp_social_mage_plugin_styles' );
 
-$new_version = '1.3.8';  // change this to update version
+$new_version = '1.3.9';  // change this to update version
 
 if (get_option(WP_SM_VERSION_KEY) != $new_version) {
   // Execute your upgrade logic here
