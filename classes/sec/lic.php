@@ -7,7 +7,7 @@ class CSNA_lic
 {
 	public $prefix = "csna_";
 	private $message = "";
-	private $url = 'http://topdogimsoftware.com/socialmage/index.php?';
+	private $url = WP_SM_LICENSE_HOST;
 	private $fail_safe_message = "We're sorry but communications are temporarily down. Please wait for service to be restored before trying to validate your license key again.";
 	public $key = '';
 	public $uri = '';

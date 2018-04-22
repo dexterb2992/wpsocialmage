@@ -488,7 +488,7 @@ function getUserAccess($pl_type = 'standard_wl'){
 		$lic = new CSNA_lic(array(
 			'prefix' => 'wp_social_mage_wl_', 
 			'pl_type' => $value, //standard, pro, standard_wl, pro_wl
-			'url'  => 'http://topdogimsoftware.com/socialmage/index.php?', 
+			'url'  => WP_SM_LICENSE_HOST, 
 		));
 
 		if( $value == 'pro' ){

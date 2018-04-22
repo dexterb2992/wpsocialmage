@@ -134,3 +134,9 @@ version 1.3.7
 	- Fix blurry texts on the image when being posted to facebook.
 	- Fix image not resizing correctly when image filter is applied
 	- Code cleanup (remove commented section of codes)
+
+version 1.4.0
+	- updated license validation host
+
+version 1.4.1
+    - updated Training Page

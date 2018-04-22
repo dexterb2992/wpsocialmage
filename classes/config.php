@@ -23,6 +23,8 @@ define('WP_SM_UPLOADS_FOLDER_ABS_PATH', $wp_dir['basedir'].'/wp-social-mage/user
 define('WP_SM_PIXABAY_USERNAME', 'dexterb2992');
 define('WP_SM_PIXABAY_KEY', '1362230-a0032011b620800873c110448');
 
+define('WP_SM_LICENSE_HOST', 'https://topdogimsolutions.com/licensing/index.php?');
+
 /**
  * returns array or json object
  */

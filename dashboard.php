@@ -8,7 +8,7 @@
 	$lic = new CSNA_lic(array(
 		'prefix' => 'wp_social_mage_', 
 		'pl_type' => 'standard', //standard, pro, standard_wl, pro_wl
-		'url'  => 'http://topdogimsoftware.com/socialmage/index.php?', 
+		'url'  => WP_SM_LICENSE_HOST, 
 	));
 
 	if($_POST && !empty($_POST['set_lic_key'])) {
